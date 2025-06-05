@@ -2,7 +2,7 @@
 
 import rclpy
 from rclpy.node import Node
-from camera_interface.srv import CameraSrv
+from custom_interface.srv import CameraSrv
 from geometry_msgs.msg import Point
 import sys
 
