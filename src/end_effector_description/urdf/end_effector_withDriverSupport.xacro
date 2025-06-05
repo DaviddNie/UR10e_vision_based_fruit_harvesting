@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<!-- displays the end-effector with UR5e(no Moveit support)-->
+
+<robot name="end_effector_withDriverSupport" xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Including the claw.urdf.xacro file to give scope to xacro:claw. Inclusion is a simple copy-and-paste of code. -->
+  <!-- <xacro:include filename="$(find end_effector_description)/urdf/end_effector.urdf.xacro" /> -->
+
+  <!-- UR5e robot arm -->
+  <!-- URDF won't build if following args aren't defined. -->
+  <xacro:arg name="name" default="ur10"/>
+  <xacro:arg name="ur_type" default="ur10"/>
+  <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro"/>
+
+  <link name="camera_link"> </link>
+
+  <joint name="camera_joint" type="fixed">
+      <parent link="flange"/>
+      <child link="camera_link"/>
+      <origin xyz="0.0345 0 -0.1032" rpy="${pi} ${pi} ${pi}"/>
+  </joint>
+
+</robot>

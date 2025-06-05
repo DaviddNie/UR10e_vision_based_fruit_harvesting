@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>camera</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="davidnie0418@gmail.com">davidnie</maintainer>
+  <license>TODO: License declaration</license>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+  <depend>rclpy</depend>   <!-- Add rclpy as a runtime dependency -->
+  <depend>om_aiv_msg</depend> <!-- Add tm_msgs as a dependency -->
+  <depend>geometry_msgs</depend> 
+  <depend>camera_interface</depend> 
+  <depend>tf2_ros</depend>
+  <depend> tf_transformations </depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
