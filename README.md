@@ -9,3 +9,9 @@
 ## Depth Camera Visualisation
 
 ![alt text](img/depth_camera_visual.png)
+
+
+## YOLO-based object detection + transformation using the depth camera
+
+![alt text](img/apple1.png)
+![alt text](img/apple2.png)

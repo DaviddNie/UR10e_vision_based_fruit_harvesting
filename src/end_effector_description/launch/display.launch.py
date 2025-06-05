@@ -50,7 +50,7 @@ def get_ur_control_launch():
         'ur_type': ur_type,
         'robot_ip': ip_address,
         'use_fake_hardware': use_fake_str,
-        'launch_rviz': 'false',  
+        'launch_rviz': 'true',  
         'description_file': end_effector_path,
     }
 
@@ -90,7 +90,7 @@ def generate_launch_description():
     """Main function to generate the complete launch description."""
     launch_description = [
         get_ur_control_launch(),
-        get_moveit_launch(),
+        # get_moveit_launch(),
     ]
 
     # Only add camera launch if using real hardware
