@@ -46,8 +46,8 @@ public:
     move_group_->setPlannerId(node_->get_parameter("planner_id").as_string());
 
     // Set velocity and acceleration scaling
-    move_group_->setMaxVelocityScalingFactor(0.5);
-    move_group_->setMaxAccelerationScalingFactor(0.5);
+    move_group_->setMaxVelocityScalingFactor(0.2);
+    move_group_->setMaxAccelerationScalingFactor(0.2);
 
     geometry_msgs::msg::PoseStamped current_pose = move_group_->getCurrentPose();
 
@@ -73,7 +73,7 @@ public:
       roll, pitch, yaw
     );
 
-    setupCollisionObjects();
+    // setupCollisionObjects();
 
     service_ = node_->create_service<tm_msgs::srv::MovementRequest>(
       "/moveit_path_plan",
@@ -84,59 +84,58 @@ public:
   moveit_msgs::msg::Constraints create_path_constraints() {
     moveit_msgs::msg::Constraints constraints;
 
-    // // Joint constraints for base_link (-10 to 90 degrees)
-    // moveit_msgs::msg::JointConstraint base_link_constraint;
-    // base_link_constraint.joint_name = "shoulder_pan_joint";
-    // base_link_constraint.position = 0.785;  // Center of range (45 degrees)
-    // base_link_constraint.tolerance_below = 0.985;  // 45 degrees in radians
-    // base_link_constraint.tolerance_above = 0.785;  // 45 degrees in radians
-    // base_link_constraint.weight = 1.0;
-    // constraints.joint_constraints.push_back(base_link_constraint);
+    // Joint constraints for base_link (-10 to 90 degrees)
+    moveit_msgs::msg::JointConstraint base_link_constraint;
+    base_link_constraint.joint_name = "shoulder_pan_joint";
+    base_link_constraint.position = 0.785;  // Center of range (45 degrees)
+    base_link_constraint.tolerance_below = 0.985;  // 45 degrees in radians
+    base_link_constraint.tolerance_above = 0.785;  // 45 degrees in radians
+    base_link_constraint.weight = 1.0;
+    constraints.joint_constraints.push_back(base_link_constraint);
     
-    // // Joint constraints for shoulder (-22.5 to -90 degrees)
-    // moveit_msgs::msg::JointConstraint shoulder_constraint;
-    // shoulder_constraint.joint_name = "shoulder_lift_joint";
-    // shoulder_constraint.position = -0.9817;  // Midpoint (-56.25 degrees in radians)
-    // shoulder_constraint.tolerance_below = 0.589;  // ~33.75 degrees to lower bound
-    // shoulder_constraint.tolerance_above = 0.589;  // ~33.75 degrees to upper bound
-    // shoulder_constraint.weight = 1.0;
-    // constraints.joint_constraints.push_back(shoulder_constraint);
+    // Joint constraints for shoulder (-22.5 to -90 degrees)
+    moveit_msgs::msg::JointConstraint shoulder_constraint;
+    shoulder_constraint.joint_name = "shoulder_lift_joint";
+    shoulder_constraint.position = -0.9817;  // Midpoint (-56.25 degrees in radians)
+    shoulder_constraint.tolerance_below = 0.589;  // ~33.75 degrees to lower bound
+    shoulder_constraint.tolerance_above = 0.589;  // ~33.75 degrees to upper bound
+    shoulder_constraint.weight = 1.0;
+    constraints.joint_constraints.push_back(shoulder_constraint);
 
-    // // Joint constraint for elbow (75° to 145°)
-    // moveit_msgs::msg::JointConstraint elbow_constraint;
-    // elbow_constraint.joint_name = "elbow_joint";
-    // elbow_constraint.position = 1.8752;             // Midpoint in radians (107.5°)
-    // elbow_constraint.tolerance_below = 0.6535;      // 1.8752 - 1.2217 = ~0.6535
-    // elbow_constraint.tolerance_above = 0.6555;      // 2.5307 - 1.8752 = ~0.6555
-    // elbow_constraint.weight = 1.0;
-    // constraints.joint_constraints.push_back(elbow_constraint);
+    // Joint constraint for elbow (50° to 145°)
+    moveit_msgs::msg::JointConstraint elbow_constraint;
+    elbow_constraint.joint_name = "elbow_joint";
+    elbow_constraint.position = 1.8752;             // Midpoint in radians (107.5°)
+    elbow_constraint.tolerance_below = 0.9535;      // 1.8752 - 1.2217 = ~0.6535
+    elbow_constraint.tolerance_above = 0.6555;      // 2.5307 - 1.8752 = ~0.6555
+    elbow_constraint.weight = 1.0;
+    constraints.joint_constraints.push_back(elbow_constraint);
 
-    // Joint constraints for wrist_1 (-45 to +45 degrees)
+    // Joint constraints for wrist_1 (-45 to -145 degrees)
     moveit_msgs::msg::JointConstraint wrist_1_constraint;
-    wrist_1_constraint.joint_name = "wrist_1_link";
-    wrist_1_constraint.position = 0.0;  // Center of range
-    wrist_1_constraint.tolerance_above = 0.785;  // 45 degrees in radians
-    wrist_1_constraint.tolerance_below = 0.785;
+    wrist_1_constraint.joint_name = "wrist_1_joint";
+    wrist_1_constraint.position = -1.6581;           // Midpoint (-95°)
+    wrist_1_constraint.tolerance_below = 0.8731;    // 1.6581 - 0.785
+    wrist_1_constraint.tolerance_above = 0.8726;    // 2.5307 - 1.6581
     wrist_1_constraint.weight = 1.0;
     constraints.joint_constraints.push_back(wrist_1_constraint);
 
     // Joint constraints for wrist_2 (-45 to +135 degrees)
     moveit_msgs::msg::JointConstraint wrist_2_constraint;
-    wrist_2_constraint.joint_name = "wrist_2_link";
-    wrist_2_constraint.position = 1.5708;  // Center of range (90 degrees)
-    wrist_2_constraint.tolerance_below = 0.785;  // 45 degrees in radians
-    wrist_2_constraint.tolerance_above = 0.785;  // 45 degrees in radians
+    wrist_2_constraint.joint_name = "wrist_2_joint";
+    wrist_2_constraint.position = -1.5708;            // -90 degrees
+    wrist_2_constraint.tolerance_below = 0.1745;      // 10 degrees
+    wrist_2_constraint.tolerance_above = 0.1745;      // 10 degrees
     wrist_2_constraint.weight = 1.0;
     constraints.joint_constraints.push_back(wrist_2_constraint);
 
-    moveit_msgs::msg::JointConstraint joint6_constraint;
-
-    joint6_constraint.joint_name = "wrist_3_link";
-    joint6_constraint.position = 0.0;  // Centered at 0 rad, adjust if needed
-    joint6_constraint.tolerance_above = M_PI;     // Allow 180 deg in positive
-    joint6_constraint.tolerance_below = M_PI;     // Allow 180 deg in negative
-    joint6_constraint.weight = 1.0;
-    constraints.joint_constraints.push_back(joint6_constraint);
+    // moveit_msgs::msg::JointConstraint joint6_constraint;
+    // joint6_constraint.joint_name = "wrist_3_joint";
+    // joint6_constraint.position = 1.5708;  // Centered at 0 rad, adjust if needed
+    // joint6_constraint.tolerance_above = 0.1745;      // 10 degrees
+    // joint6_constraint.tolerance_below = 0.1745;      // 10 degrees
+    // joint6_constraint.weight = 1.0;
+    // constraints.joint_constraints.push_back(joint6_constraint);
 
 
 
@@ -172,7 +171,7 @@ public:
     planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 0.04, 1.0, 0.70, -0.30, 0.5, frame_id, "backWall"));
     planning_scene_interface.applyCollisionObject(generateCollisionObject(0.04, 1.2, 1.0, -0.25, 0.25, 0.5, frame_id, "sideWall"));
     planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 2.4, 0.01, 0.85, 0.25, 0.013, frame_id, "table"));
-    planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 2.4, 0.04, 0.85, 0.25, 1.2, frame_id, "ceiling"));
+    planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 2.4, 0.04, 0.85, 0.25, 0.9, frame_id, "ceiling"));
 }
 
 auto generateCollisionObject(float sx, float sy, float sz, float x, float y, float z, const std::string& frame_id, const std::string& id) -> moveit_msgs::msg::CollisionObject {
@@ -241,7 +240,7 @@ return collision_object;
     moveit::planning_interface::MoveGroupInterface::Plan plan;
     bool success = false;
     int attempts = 0;
-    const int max_attempts = 50;
+    const int max_attempts = 5;
     
     while (!success && attempts < max_attempts) {
       success = (move_group_->plan(plan) == moveit::core::MoveItErrorCode::SUCCESS);
@@ -278,13 +277,17 @@ int main(int argc, char** argv)
   return 0;
 }
 
-// [INFO] [1749099580.306942371] [camera_server]: Transformed coordinates (base frame): X: -0.622, Y: -0.183, Z: 0.055
-// [INFO] [1749099580.313162098] [camera_server]: Transformed coordinates (base frame): X: -0.700, Y: -0.280, Z: 0.061
-// [INFO] [1749099580.316878851] [camera_server]: Transformed coordinates (base frame): X: -0.542, Y: -0.372, Z: 0.057
-// [INFO] [1749099580.319195569] [camera_server]: Transformed coordinates (base frame): X: -0.472, Y: -0.288, Z: 0.062
-
 //ros2 service call /moveit_path_plan tm_msgs/srv/MovementRequest "{positions: [-0.622, -0.183, 0.055, 0.0, 3.14, 0.0]}"
 
 // should be 
 
-// ros2 service call /moveit_path_plan tm_msgs/srv/MovementRequest "{positions: [0.622, -0.183, 0.155, 0.0, 3.14, 0.0]}"
+// ros2 service call /moveit_path_plan tm_msgs/srv/MovementRequest "{positions: [0.622, 0.183, 0.255, 0.0, 3.14, 0.0]}"
+
+
+// birds-eye for camera
+// ros2 service call /moveit_path_plan tm_msgs/srv/MovementRequest "{positions: [0.822, 0.183, 0.856, 0.0, 3.14, 0.0]}"
+
+// [INFO] [1749184846.573696882] [camera_client]:   Object 1: X=-0.449m, Y=-0.188m, Z=0.056m
+// [INFO] [1749184846.575107469] [camera_client]:   Object 2: X=-0.791m, Y=-0.229m, Z=0.057m
+// [INFO] [1749184846.576388168] [camera_client]:   Object 3: X=-0.632m, Y=-0.126m, Z=0.054m
+// [INFO] [1749184846.577930020] [camera_client]:   Object 4: X=-0.951m, Y=-0.097m, Z=0.057m
