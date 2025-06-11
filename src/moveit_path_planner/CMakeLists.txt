@@ -6,7 +6,7 @@ find_package(rclcpp REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
-find_package(tm_msgs REQUIRED)
+find_package(custom_interface REQUIRED)
 
 add_executable(moveit_path_planning_server
   src/moveit_path_planning_server.cpp
@@ -17,7 +17,7 @@ ament_target_dependencies(moveit_path_planning_server
   moveit_ros_planning_interface
   geometry_msgs
   tf2_geometry_msgs
-  tm_msgs
+  custom_interface
 )
 
 install(TARGETS moveit_path_planning_server

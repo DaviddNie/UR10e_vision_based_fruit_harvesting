@@ -10,7 +10,7 @@
 #include "moveit_msgs/msg/joint_constraint.hpp"
 #include "moveit_msgs/msg/orientation_constraint.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
-#include "tm_msgs/srv/movement_request.hpp"
+#include "custom_interface/srv/movement_request.hpp"
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2/LinearMath/Matrix3x3.h> 
 
@@ -75,7 +75,7 @@ public:
 
     // setupCollisionObjects();
 
-    service_ = node_->create_service<tm_msgs::srv::MovementRequest>(
+    service_ = node_->create_service<custom_interface::srv::MovementRequest>(
       "/moveit_path_plan",
       std::bind(&MoveitPathPlanningServer::handle_request, this, _1, _2)
     );
@@ -197,8 +197,8 @@ return collision_object;
 }
 
   void handle_request(
-    const std::shared_ptr<tm_msgs::srv::MovementRequest::Request> request,
-    std::shared_ptr<tm_msgs::srv::MovementRequest::Response> response)
+    const std::shared_ptr<custom_interface::srv::MovementRequest::Request> request,
+    std::shared_ptr<custom_interface::srv::MovementRequest::Response> response)
   {
     RCLCPP_INFO(node_->get_logger(), "Received MoveIt path planning request.");
 
@@ -264,7 +264,7 @@ return collision_object;
 private:
   rclcpp::Node::SharedPtr node_;
   std::shared_ptr<moveit::planning_interface::MoveGroupInterface> move_group_;
-  rclcpp::Service<tm_msgs::srv::MovementRequest>::SharedPtr service_;
+  rclcpp::Service<custom_interface::srv::MovementRequest>::SharedPtr service_;
 };
 
 int main(int argc, char** argv)
@@ -277,15 +277,15 @@ int main(int argc, char** argv)
   return 0;
 }
 
-//ros2 service call /moveit_path_plan tm_msgs/srv/MovementRequest "{positions: [-0.622, -0.183, 0.055, 0.0, 3.14, 0.0]}"
+//ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [-0.622, -0.183, 0.055, 0.0, 3.14, 0.0]}"
 
 // should be 
 
-// ros2 service call /moveit_path_plan tm_msgs/srv/MovementRequest "{positions: [0.622, 0.183, 0.255, 0.0, 3.14, 0.0]}"
+// ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.622, 0.183, 0.255, 0.0, 3.14, 0.0]}"
 
 
 // birds-eye for camera
-// ros2 service call /moveit_path_plan tm_msgs/srv/MovementRequest "{positions: [0.822, 0.183, 0.856, 0.0, 3.14, 0.0]}"
+// ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.822, 0.183, 0.856, 0.0, 3.14, 0.0]}"
 
 // [INFO] [1749184846.573696882] [camera_client]:   Object 1: X=-0.449m, Y=-0.188m, Z=0.056m
 // [INFO] [1749184846.575107469] [camera_client]:   Object 2: X=-0.791m, Y=-0.229m, Z=0.057m
