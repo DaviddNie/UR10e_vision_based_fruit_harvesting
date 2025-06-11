@@ -39,7 +39,7 @@ class CameraServer(Node):
         # Service
         self.srv = self.create_service(
             CameraSrv, 
-            'camera_service', 
+            'camera_srv', 
             self.handle_camera_request,
             callback_group=self.service_group
         )

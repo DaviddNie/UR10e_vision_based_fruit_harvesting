@@ -46,8 +46,8 @@ public:
     move_group_->setPlannerId(node_->get_parameter("planner_id").as_string());
 
     // Set velocity and acceleration scaling
-    move_group_->setMaxVelocityScalingFactor(0.2);
-    move_group_->setMaxAccelerationScalingFactor(0.2);
+    move_group_->setMaxVelocityScalingFactor(0.1);
+    move_group_->setMaxAccelerationScalingFactor(0.1);
 
     geometry_msgs::msg::PoseStamped current_pose = move_group_->getCurrentPose();
 

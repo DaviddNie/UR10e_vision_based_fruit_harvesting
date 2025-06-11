@@ -9,7 +9,7 @@ import sys
 class CameraClient(Node):
     def __init__(self):
         super().__init__('camera_client')
-        self.client = self.create_client(CameraSrv, 'camera_service')
+        self.client = self.create_client(CameraSrv, 'camera_srv')
         
         while not self.client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('Service not available, waiting again...')

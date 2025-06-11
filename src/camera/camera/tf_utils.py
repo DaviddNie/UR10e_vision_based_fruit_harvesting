@@ -84,7 +84,7 @@ class TFHandler:
         return [
             point[2],   # Camera Z -> World X (forward)
             -point[1] + 0.038 + 0.22,   # Camera Y -> World Z (up)
-            -point[0] - 0.24,  # Camera X -> World Y (left)
+            -point[0] - 0.20,  # Camera X -> World Y (left)
         ]
     
     def pixel_to_3d(self, pixel_x, pixel_y, depth_value):
