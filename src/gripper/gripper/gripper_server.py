@@ -8,7 +8,7 @@ import requests
 class GripperServer(Node):
     def __init__(self):
         super().__init__('gripper_server')
-        self.srv = self.create_service(GripperCmd, 'gripper_command', self.gripper_callback)
+        self.srv = self.create_service(GripperCmd, 'gripper_cmd', self.gripper_callback)
         self.get_logger().info('Gripper Server ready to receive commands...')
         
     def gripper_callback(self, request, response):

@@ -36,3 +36,4 @@ MOMA_project/src/demo_package/demo_package/__pycache__
 /build
 /src/camera/camera/__pycache__
 /src/gripper/gripper/__pycache__
+/src/demo_package/demo_package/__pycache__

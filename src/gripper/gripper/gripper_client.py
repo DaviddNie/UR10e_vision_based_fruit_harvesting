@@ -7,7 +7,7 @@ from custom_interface.srv import GripperCmd
 class GripperClient(Node):
     def __init__(self):
         super().__init__('gripper_client')
-        self.cli = self.create_client(GripperCmd, 'gripper_command')
+        self.cli = self.create_client(GripperCmd, 'gripper_cmd')
         while not self.cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
         self.get_logger().info('Connected to gripper server')

@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-			'horizontal_fruit_gripping_demo = demo_package.horizontal_fruit_gripping:main',
+			'horizontal_fruit_gripping_demo = demo_package.horizontal_fruit_gripping_demo:main',
         ],
     },
 )
