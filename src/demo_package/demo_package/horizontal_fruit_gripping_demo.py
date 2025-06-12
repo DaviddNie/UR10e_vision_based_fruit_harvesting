@@ -128,11 +128,7 @@ class DemoRoutine(Node):
                 # 3.6 Release the apple
                 self.get_logger().info("Releasing apple")
                 self.send_gripper_request(100)  # Open gripper
-                
-                # 3.7 Return to bird's eye view for next apple
-                self.get_logger().info("Returning to bird's eye view")
-                self.send_movement_request(bird_eye_position)
-                
+                                
             # After processing all apples, loop will repeat detection
             
         self.get_logger().info("Demo routine completed")
