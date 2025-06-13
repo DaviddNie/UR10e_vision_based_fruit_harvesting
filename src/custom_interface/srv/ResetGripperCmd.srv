@@ -1,0 +1,4 @@
+bool reset_gripper
+---
+bool success
+string message

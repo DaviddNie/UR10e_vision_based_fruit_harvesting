@@ -13,6 +13,7 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/CameraSrv.srv"
   "srv/GripperCmd.srv"
+  "srv/ResetGripperCmd.srv"
   "srv/MovementRequest.srv"
   DEPENDENCIES geometry_msgs # Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
 )
