@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from custom_interface.srv import CameraSrv, MovementRequest, GripperCmd
+from custom_interface.srv import CameraSrv, MovementRequest, GripperCmd, ResetGripperCmd
 from geometry_msgs.msg import Point
 import time
 
@@ -11,6 +11,7 @@ class DemoRoutine(Node):
         # Initialize all service clients
         self.camera_client = self.create_client(CameraSrv, '/camera_srv')
         self.gripper_client = self.create_client(GripperCmd, '/gripper_cmd')
+        self.reset_gripper_client = self.create_client(ResetGripperCmd, '/reset_gripper_cmd')
         self.movement_client = self.create_client(MovementRequest, '/moveit_path_plan')
         
         # Wait for services to be available
@@ -19,6 +20,9 @@ class DemoRoutine(Node):
             
         while not self.gripper_client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('Gripper Service not available, waiting again...')
+
+        while not self.reset_gripper_client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('ResetGripper Service not available, waiting again...')
             
         while not self.movement_client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('Movement Service not available, waiting again...')
@@ -59,6 +63,24 @@ class DemoRoutine(Node):
             return response
         except Exception as e:
             self.get_logger().error(f'Gripper Service call failed: {e}')
+            return None
+
+
+    def send_reset_gripper_request(self, reset):
+        
+        request = ResetGripperCmd.Request()
+        request.reset_gripper = reset
+        self.get_logger().info(f'Sending ResetGripper request: reset_gripper={reset}')
+
+        future = self.reset_gripper_client.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+        
+        try:
+            response = future.result()
+            self.get_logger().info(f'Reset Gripper Response: {response.success} - {response.message}')
+            return response
+        except Exception as e:
+            self.get_logger().error(f'Reset Gripper Service call failed: {e}')
             return None
 
     def send_movement_request(self, positions):
@@ -115,12 +137,16 @@ class DemoRoutine(Node):
                 
                 # 3.3 Grip the apple
                 self.get_logger().info("Gripping apple")
-                self.send_gripper_request(60)  # Close gripper # 78mm is used as 0mm would trigger a safety fault
+                self.send_gripper_request(70)  # Close gripper # 78mm is used as 0mm would trigger a safety fault
                 
                 # 3.4 Lift the apple
                 self.get_logger().info("Lifting apple")
                 self.send_movement_request(above_apple)
                 
+                # 3.3.1 Reset Gripper in case of a safety fault
+                self.get_logger().info("reset gripper")
+                self.send_reset_gripper_request(True)
+
                 # 3.5 Move to drop position
                 self.get_logger().info("Moving to drop position")
                 self.send_movement_request(drop_position)
