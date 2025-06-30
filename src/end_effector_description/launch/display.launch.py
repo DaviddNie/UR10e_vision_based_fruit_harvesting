@@ -39,7 +39,6 @@ def get_realsense_launch():
         }.items()
     )
 
-
 # ros2 launch ur_robot_driver ur_control.launch.py \
 #     ur_type:='ur10e' \
 #     robot_ip:='<your_robot_ip>' \
@@ -99,11 +98,32 @@ def get_moveit_launch():
         ]
     )
 
+def get_moveit_launch():
+    moveit_launch_path = os.path.join(
+        get_package_share_directory('ur10e_moveit_config'), 'launch', 'move_group.launch.py'
+    )
+
+    return IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(moveit_launch_path)
+    )
+
+def get_rviz_launch():
+    moveit_launch_path = os.path.join(
+        get_package_share_directory('ur10e_moveit_config'), 'launch', 'moveit_rviz.launch.py'
+    )
+
+    return IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(moveit_launch_path)
+    )
+
+
+
 def generate_launch_description():
     """Main function to generate the complete launch description."""
     launch_description = [
         get_ur_control_launch(),
-        # get_moveit_launch(),
+        get_moveit_launch(),
+        get_rviz_launch(),
     ]
 
     # Only add camera launch if using real hardware
