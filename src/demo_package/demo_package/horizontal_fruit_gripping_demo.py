@@ -137,7 +137,7 @@ class DemoRoutine(Node):
                 
                 # 3.3 Grip the apple
                 self.get_logger().info("Gripping apple")
-                self.send_gripper_request(70)  # Close gripper # 78mm is used as 0mm would trigger a safety fault
+                self.send_gripper_request(0)  # Close gripper # 78mm is used as 0mm would trigger a safety fault
                 
                 # 3.4 Lift the apple
                 self.get_logger().info("Lifting apple")
