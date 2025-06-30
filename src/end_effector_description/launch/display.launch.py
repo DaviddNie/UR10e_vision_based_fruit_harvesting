@@ -116,6 +116,15 @@ def get_rviz_launch():
         PythonLaunchDescriptionSource(moveit_launch_path)
     )
 
+def get_auxiliary_launch():
+    moveit_launch_path = os.path.join(
+        get_package_share_directory('end_effector_description'), 'launch', 'auxiliary.launch.py'
+    )
+
+    return IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(moveit_launch_path)
+    )
+
 
 
 def generate_launch_description():
@@ -129,5 +138,6 @@ def generate_launch_description():
     # Only add camera launch if using real hardware
     if not use_fake:
         launch_description.append(get_realsense_launch())
+        launch_description.append(get_auxiliary_launch())
 
     return LaunchDescription(launch_description)
