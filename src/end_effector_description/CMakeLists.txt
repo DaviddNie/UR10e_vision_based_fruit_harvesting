@@ -8,7 +8,7 @@ find_package(ament_cmake REQUIRED)
 
 # For each subfolder, find any more installation rules.
 install(
-	DIRECTORY launch rviz urdf
+	DIRECTORY launch rviz urdf etc
 	DESTINATION share/${PROJECT_NAME}
 )
 

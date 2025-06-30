@@ -40,10 +40,22 @@ def get_realsense_launch():
     )
 
 
+# ros2 launch ur_robot_driver ur_control.launch.py \
+#     ur_type:='ur10e' \
+#     robot_ip:='<your_robot_ip>' \
+#     use_fake_hardware:='<true_or_false>' \
+#     launch_rviz:='false' \
+#     description_file:="$(ros2 pkg prefix end_effector_description)/share/end_effector_description/urdf/end_effector_withDriverSupport.xacro" \
+#     kinematics_params_file:="$(ros2 pkg prefix end_effector_description)/share/end_effector_description/etc/robot_calibration.yaml"
+
 def get_ur_control_launch():
     """Configure UR control launch for the UR10e arm."""
     end_effector_path = os.path.join(
         get_package_share_directory('end_effector_description'), 'urdf', 'end_effector_withDriverSupport.xacro'
+    )
+
+    kinematics_path = os.path.join(
+        get_package_share_directory('end_effector_description'), 'etc', 'robot_calibration.yaml'
     )
 
     ur_control_launch_args = {
@@ -52,6 +64,7 @@ def get_ur_control_launch():
         'use_fake_hardware': use_fake_str,
         'launch_rviz': 'false',  
         'description_file': end_effector_path,
+        'kinematics_params_file': kinematics_path,
     }
 
     # Add controller if using simulated hardware
@@ -90,7 +103,7 @@ def generate_launch_description():
     """Main function to generate the complete launch description."""
     launch_description = [
         get_ur_control_launch(),
-        get_moveit_launch(),
+        # get_moveit_launch(),
     ]
 
     # Only add camera launch if using real hardware

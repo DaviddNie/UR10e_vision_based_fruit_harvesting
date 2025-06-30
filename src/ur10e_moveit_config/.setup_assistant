@@ -1,0 +1,26 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: end_effector_description
+    relative_path: urdf/end_effector_withDriverSupport.xacro
+    xacro_args: ur_type:=ur10e
+  srdf:
+    relative_path: config/end_effector_withDriverSupport.srdf
+  package_settings:
+    author_name: David Nie
+    author_email: z5303303@ad.unsw.edu.au
+    generated_timestamp: 1751257006
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity
+  modified_urdf:
+    xacros:
+      - control_xacro
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity
