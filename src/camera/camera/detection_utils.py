@@ -57,9 +57,14 @@ class DetectionHandler:
                 if cls_id == request.identifier and conf > 0.5:
                     x_center = int((box[0] + box[2]) / 2)
                     y_center = int((box[1] + box[3]) / 2)
-                    depth = self.current_depth[int(y_center), int(x_center)]
+                    avg_depth = self.get_average_depth(int(x_center), int(y_center))
+
+                    # if invalid 
+                    if np.isnan(avg_depth):
+                        print(f"INVALID DEPTH!!!! SKIPPING!!!!")
+                        continue
                     
-                    point_3d = self.tf_handler.pixel_to_3d(x_center, y_center, depth)
+                    point_3d = self.tf_handler.pixel_to_3d(x_center, y_center, avg_depth)
 
                     if point_3d:
                         point_msg = Point()
@@ -127,3 +132,27 @@ class DetectionHandler:
             self.current_depth = self.bridge.imgmsg_to_cv2(depth_msg, 'passthrough')
         except Exception as e:
             self.node.get_logger().error(f"Image conversion failed: {str(e)}")
+
+    def get_average_depth(self, x_center, y_center, sampling_radius=5):
+        """
+        Compute average depth in a small fixed window around center.
+        
+        Args:
+            x_center, y_center (int): Center coordinates
+            sampling_radius (int): How many pixels to sample around center (default=2 → 5×5 window)
+        
+        Returns:
+            float: Robust average depth
+        """
+        # Extract fixed-size patch
+        depth_patch = self.current_depth[
+            max(0, y_center - sampling_radius):min(self.current_depth.shape[0], y_center + sampling_radius + 1),
+            max(0, x_center - sampling_radius):min(self.current_depth.shape[1], x_center + sampling_radius + 1)
+        ]
+        
+        # Process valid depths
+        valid_depths = depth_patch[(depth_patch > 0) & ~np.isnan(depth_patch)]
+        if len(valid_depths) < 3:
+            return float('nan')
+        
+        return float(np.median(valid_depths))  # Median is more robust than mean
