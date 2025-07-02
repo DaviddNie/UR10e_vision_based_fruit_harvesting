@@ -53,8 +53,10 @@ class DetectionHandler:
             confidences = results.boxes.conf.cpu().numpy()
             
             detections = []
+            self.last_detections = []
+
             for i, (box, cls_id, conf) in enumerate(zip(boxes, class_ids, confidences)):
-                if cls_id == request.identifier and conf > 0.5:
+                if cls_id == request.identifier and conf > 0.35:
                     x_center = int((box[0] + box[2]) / 2)
                     y_center = int((box[1] + box[3]) / 2)
                     avg_depth = self.get_average_depth(int(x_center), int(y_center))
@@ -66,50 +68,48 @@ class DetectionHandler:
                     
                     point_3d = self.tf_handler.pixel_to_3d(x_center, y_center, avg_depth)
 
-                    if point_3d:
-                        point_msg = Point()
-                        point_msg.x = point_3d[0]
-                        point_msg.y = point_3d[1]
-                        point_msg.z = point_3d[2]
+                    if not point_3d:
+                        continue
+
+                    # Prepare for visualization (camera frame coordinates)
+                    vis_data = {
+                        'box': box,
+                        'center': (x_center, y_center),
+                        'point_3d': point_3d,  # Camera frame coordinates
+                        'confidence': conf
+                    }
+
+                    point_msg = Point()
+                    point_msg.x = point_3d[0]
+                    point_msg.y = point_3d[1]
+                    point_msg.z = point_3d[2]
+                    
+                    try:
+                        # Transform the point to base frame
+                        base_pose = self.tf_handler.transform_to_base(point_msg)
                         
-                        try:
-                            # Transform the point to base frame
-                            base_pose = self.tf_handler.transform_to_base(point_msg)
+                        # Create new point with transformed coordinates
+                        transformed_point = Point()
+
+                        # the minus sign converts to actual coordinates wrt. base_link
+                        transformed_point.x = -base_pose.x
+                        transformed_point.y = -base_pose.y
+                        transformed_point.z = base_pose.z
+                        
+                        detections.append(transformed_point)
+                        self.last_detections.append(vis_data)
+                        
+                        # Print the transformed coordinates
+                        self.node.get_logger().info(
+                            f"Transformed coordinates (base frame): "
+                            f"X: {transformed_point.x:.3f}, "
+                            f"Y: {transformed_point.y:.3f}, "
+                            f"Z: {transformed_point.z:.3f}")
                             
-                            # Create new point with transformed coordinates
-                            transformed_point = Point()
-                            transformed_point.x = base_pose.x
-                            transformed_point.y = base_pose.y
-                            transformed_point.z = base_pose.z
-                            
-                            detections.append(transformed_point)
-                            
-                            # Print the transformed coordinates
-                            self.node.get_logger().info(
-                                f"Transformed coordinates (base frame): "
-                                f"X: {transformed_point.x:.3f}, "
-                                f"Y: {transformed_point.y:.3f}, "
-                                f"Z: {transformed_point.z:.3f}")
-                                
-                        except (tf2_ros.LookupException, 
-                                tf2_ros.ConnectivityException, 
-                                tf2_ros.ExtrapolationException) as e:
-                            self.node.get_logger().error(f"TF transform failed: {str(e)}")
-                            detections.append(point_msg)  # Fall back to camera frame coordinates
-            
-            # Update visualization state
-            self.last_detections = [{
-                'box': box,
-                'center': (x_center, y_center),
-                'point_3d': point_3d,
-                'confidence': conf
-            } for box, cls_id, conf, (x_center, y_center, point_3d) in 
-              zip(boxes, class_ids, confidences, 
-                  [(int((b[0]+b[2])/2), int((b[1]+b[3])/2), 
-                    self.tf_handler.pixel_to_3d(int((b[0]+b[2])/2), int((b[1]+b[3])/2), 
-                                    self.current_depth[int((b[1]+b[3])/2), int((b[0]+b[2])/2)]))
-                   for b in boxes])
-              if cls_id == request.identifier and conf > 0.5]
+                    except (tf2_ros.LookupException, 
+                            tf2_ros.ConnectivityException, 
+                            tf2_ros.ExtrapolationException) as e:
+                        self.node.get_logger().error(f"TF transform failed: {str(e)}")
             
             self.visualiser.update_cv_visualization(self.current_frame, self.last_detections)
 
