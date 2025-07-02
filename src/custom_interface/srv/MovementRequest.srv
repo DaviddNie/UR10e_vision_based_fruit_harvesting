@@ -1,4 +1,9 @@
+# constraints_identifier
+# 0 <- no constraints
+# 1 <- orientation constraint
+
 string command
 float64[] positions
+int32 constraints_identifier
 ---
 bool success

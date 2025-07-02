@@ -36,7 +36,6 @@ public:
     node_->declare_parameter("goal_joint_tolerance", 0.01);  // Increased from 0.01
     node_->declare_parameter("goal_position_tolerance", 0.01);  // Increased from 0.01
     node_->declare_parameter("goal_orientation_tolerance", 0.01);  // Increased from 0.01
-    node_->declare_parameter("planner_id", "RRTConnectkConfigDefault");
 
     // Apply parameters
     move_group_->setPlanningTime(node_->get_parameter("planning_time").as_double());
@@ -137,7 +136,11 @@ public:
     
     // Set Cartesian pose target
     move_group_->setPoseTarget(target_pose);
-    move_group_->setPathConstraints(create_path_constraints());
+    move_group_->clearPathConstraints();
+
+    if (request->constraints_identifier == ORIENTATION_CONSTRAINT) {
+      move_group_->setPathConstraints(create_path_constraints());
+    }
     
     // Plan with retries
     moveit::planning_interface::MoveGroupInterface::Plan plan;
@@ -171,6 +174,9 @@ private:
   std::shared_ptr<moveit::planning_interface::MoveGroupInterface> move_group_;
   rclcpp::Service<custom_interface::srv::MovementRequest>::SharedPtr service_;
   std::unordered_map<std::string, moveit::planning_interface::MoveGroupInterface::Plan> plan_cache_;
+
+  const int NO_CONSTRAINT = 0;
+  const int ORIENTATION_CONSTRAINT = 1;
 };
 
 int main(int argc, char** argv)
