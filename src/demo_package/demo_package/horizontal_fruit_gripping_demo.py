@@ -4,6 +4,9 @@ from custom_interface.srv import CameraSrv, MovementRequest, GripperCmd, ResetGr
 from geometry_msgs.msg import Point
 import time
 
+NO_CONSTRAINT = 0
+ORIENTATION_CONSTRAINT = 1
+
 class DemoRoutine(Node):
     def __init__(self):
         super().__init__('demo_routine')
@@ -83,9 +86,11 @@ class DemoRoutine(Node):
             self.get_logger().error(f'Reset Gripper Service call failed: {e}')
             return None
 
-    def send_movement_request(self, positions):
+    def send_movement_request(self, positions, constraint = NO_CONSTRAINT):
         request = MovementRequest.Request()
         request.positions = positions
+        request.constraints_identifier = constraint
+
         self.get_logger().info(f'Sending Movement request: {positions}')
 
         future = self.movement_client.call_async(request)
@@ -126,18 +131,20 @@ class DemoRoutine(Node):
                 self.get_logger().info(f"Processing apple at position: {x}, {y}, {z}")
                 
                 # 3.1 Move above the apple
-                above_apple = [-x, -y, 0.35, 0.0, 3.14, 0.0]
+                above_apple = [-x, -y, z + 0.3, 0.0, 3.14, 0.0]
                 self.get_logger().info("Moving above apple")
                 self.send_movement_request(above_apple)
                 
                 # 3.2 Lower to picking height
-                pick_position = [-x, -y, 0.25, 0.0, 3.14, 0.0]
+                pick_position = [-x, -y, z + 0.17, 0.0, 3.14, 0.0]
                 self.get_logger().info("Lowering to pick height")
                 self.send_movement_request(pick_position)
                 
                 # 3.3 Grip the apple
                 self.get_logger().info("Gripping apple")
                 self.send_gripper_request(0)  # Close gripper # 78mm is used as 0mm would trigger a safety fault
+                
+                time.sleep(0.5)
                 
                 # 3.4 Lift the apple
                 self.get_logger().info("Lifting apple")
