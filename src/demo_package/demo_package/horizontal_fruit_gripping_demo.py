@@ -133,13 +133,13 @@ class DemoRoutine(Node):
                 break
 
             # Tune the birds eye to focus on the first apple to guarentee gripping success
-            extracted_apple_x = detected_apples[0].x
-            extracted_apple_y = detected_apples[0].y
             extracted_apple_height = detected_apples[0].z
             adjusted_birds_eye_position = copy.deepcopy(bird_eye_position)
-            adjusted_birds_eye_position[0] = extracted_apple_x
-            adjusted_birds_eye_position[1] = extracted_apple_y
+            adjusted_birds_eye_position[0] = detected_apples[0].x
+            adjusted_birds_eye_position[1] = detected_apples[0].y
             adjusted_birds_eye_position[2] = extracted_apple_height + 0.67
+
+            adjusted_above_drop_off_position = copy.deepcopy(drop_position)
 
             gripping_pos_array = self.run_detection_at_pos(adjusted_birds_eye_position)
             filtered_pos_array = self.filter_apples_for_pickup(gripping_pos_array, extracted_apple_height)
@@ -153,15 +153,20 @@ class DemoRoutine(Node):
             # 3. Process each detected apple
             for apple in filtered_pos_array:
                 x, y, z = apple.x, apple.y, apple.z
+                above_apple_height = z + 0.5
+
+                above_apple = [x, y, above_apple_height, 0.0, 3.14, 0.0]
+                adjusted_above_drop_off_position[2] = above_apple_height
+                pick_position = [x, y, z + 0.19, 0.0, 3.14, 0.0]
+
+
                 self.get_logger().info(f"Processing apple at position: {x}, {y}, {z}")
                 
                 # 3.1 Move above the apple
-                above_apple = [x, y, z + 0.3, 0.0, 3.14, 0.0]
                 self.get_logger().info("Moving above apple")
                 self.send_movement_request(above_apple)
                 
                 # 3.2 Lower to picking height
-                pick_position = [x, y, z + 0.19, 0.0, 3.14, 0.0]
                 self.get_logger().info("Lowering to pick height")
                 self.send_movement_request(pick_position)
                 
@@ -179,8 +184,11 @@ class DemoRoutine(Node):
                 self.get_logger().info("reset gripper")
                 self.send_reset_gripper_request(True)
 
-                # 3.5 Move to drop position
+                # 3.4 Move horizontally to above the drop position
                 self.get_logger().info("Moving to drop position")
+                self.send_movement_request(adjusted_above_drop_off_position)
+
+                # 3.5 Move to drop position
                 self.send_movement_request(drop_position)
                 
                 # 3.6 Release the apple
