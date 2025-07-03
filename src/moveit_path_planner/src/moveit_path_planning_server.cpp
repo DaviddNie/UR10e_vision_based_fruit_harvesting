@@ -24,6 +24,7 @@ public:
     RCLCPP_INFO(node_->get_logger(), "Starting MoveIt Path Planning Server...");
 
     // Initialize MoveGroupInterface with proper parameters
+    // base_link -> tool0
     move_group_ = std::make_shared<moveit::planning_interface::MoveGroupInterface>(
       node_, 
       "arm",
@@ -205,4 +206,6 @@ int main(int argc, char** argv)
 // ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.822, 0.183, 0.856, 0.0, 3.14, 0.0]}"
 
 // birds-eye for camera vertical
-// ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.829, 0.1, 0.35, 0, 1.57,  0]}"
+// ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.64, 0.174, 1.041, -1.56, -0.0, -1.571]}"
+
+// Object 1: X=1.248m, Y=-0.042m, Z=1.067m
