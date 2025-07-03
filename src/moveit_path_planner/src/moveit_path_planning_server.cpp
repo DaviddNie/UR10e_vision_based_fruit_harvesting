@@ -37,35 +37,13 @@ public:
     node_->declare_parameter("goal_position_tolerance", 0.01);  // Increased from 0.01
     node_->declare_parameter("goal_orientation_tolerance", 0.01);  // Increased from 0.01
 
+    setupCollisionObjects();
+
     // Apply parameters
     move_group_->setPlanningTime(node_->get_parameter("planning_time").as_double());
     move_group_->setGoalJointTolerance(node_->get_parameter("goal_joint_tolerance").as_double());
     move_group_->setGoalPositionTolerance(node_->get_parameter("goal_position_tolerance").as_double());
     move_group_->setGoalOrientationTolerance(node_->get_parameter("goal_orientation_tolerance").as_double());
-
-    geometry_msgs::msg::PoseStamped current_pose = move_group_->getCurrentPose();
-
-    tf2::Quaternion quat;
-    tf2::fromMsg(current_pose.pose.orientation, quat);
-    double roll, pitch, yaw;
-    tf2::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-    
-    RCLCPP_INFO(
-      node_->get_logger(),
-      "Reached pose:\nPosition - x: %.3f, y: %.3f, z: %.3f\nOrientation - x: %.3f, y: %.3f, z: %.3f, w: %.3f",
-      current_pose.pose.position.x,
-      current_pose.pose.position.y,
-      current_pose.pose.position.z,
-      current_pose.pose.orientation.x,
-      current_pose.pose.orientation.y,
-      current_pose.pose.orientation.z,
-      current_pose.pose.orientation.w
-    );
-    RCLCPP_INFO(
-      node_->get_logger(),
-      "RPY orientation - roll: %.3f, pitch: %.3f, yaw: %.3f",
-      roll, pitch, yaw
-    );
 
     service_ = node_->create_service<custom_interface::srv::MovementRequest>(
       "/moveit_path_plan",
@@ -169,11 +147,45 @@ public:
 
   }
 
+  void setupCollisionObjects() {
+    std::string frame_id = "world";
+    moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+
+    planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 0.04, 1.0, 0.70, -0.30, 0.5, frame_id, "backWall"));
+    planning_scene_interface.applyCollisionObject(generateCollisionObject(0.04, 1.2, 1.0, -0.25, 0.25, 0.5, frame_id, "sideWall"));
+    planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 2.4, 0.01, 0.85, 0.25, 0.013, frame_id, "table"));
+    planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 2.4, 0.04, 0.85, 0.25, 1.5, frame_id, "ceiling"));
+  }
+
+  auto generateCollisionObject(float sx, float sy, float sz, float x, float y, float z, const std::string& frame_id, const std::string& id) -> moveit_msgs::msg::CollisionObject {
+    moveit_msgs::msg::CollisionObject collision_object;
+    collision_object.header.frame_id = frame_id;
+    collision_object.id = id;
+
+    shape_msgs::msg::SolidPrimitive primitive;
+    primitive.type = primitive.BOX;
+    primitive.dimensions = {sx, sy, sz};
+
+    geometry_msgs::msg::Pose box_pose;
+    box_pose.orientation.w = 1.0;
+    box_pose.position.x = x;
+    box_pose.position.y = y;
+    box_pose.position.z = z;
+
+    collision_object.primitives.push_back(primitive);
+    collision_object.primitive_poses.push_back(box_pose);
+    collision_object.operation = collision_object.ADD;
+
+    return collision_object;
+  }
+
 private:
   rclcpp::Node::SharedPtr node_;
   std::shared_ptr<moveit::planning_interface::MoveGroupInterface> move_group_;
   rclcpp::Service<custom_interface::srv::MovementRequest>::SharedPtr service_;
-  std::unordered_map<std::string, moveit::planning_interface::MoveGroupInterface::Plan> plan_cache_;
+
+  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_sub_;
+  sensor_msgs::msg::JointState::SharedPtr latest_joint_state_;
 
   const int NO_CONSTRAINT = 0;
   const int ORIENTATION_CONSTRAINT = 1;
@@ -189,17 +201,8 @@ int main(int argc, char** argv)
   return 0;
 }
 
-//ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [-0.622, -0.183, 0.055, 0.0, 3.14, 0.0]}"
-
-// should be 
-
-// ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.622, 0.183, 0.255, 0.0, 3.14, 0.0]}"
-
-
-// birds-eye for camera
+// birds-eye for camera horizontal
 // ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.822, 0.183, 0.856, 0.0, 3.14, 0.0]}"
 
-// [INFO] [1749184846.573696882] [camera_client]:   Object 1: X=-0.449m, Y=-0.188m, Z=0.056m
-// [INFO] [1749184846.575107469] [camera_client]:   Object 2: X=-0.791m, Y=-0.229m, Z=0.057m
-// [INFO] [1749184846.576388168] [camera_client]:   Object 3: X=-0.632m, Y=-0.126m, Z=0.054m
-// [INFO] [1749184846.577930020] [camera_client]:   Object 4: X=-0.951m, Y=-0.097m, Z=0.057m
+// birds-eye for camera vertical
+// ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.829, 0.1, 0.35, 0, 1.57,  0]}"

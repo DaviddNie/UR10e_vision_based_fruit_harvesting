@@ -77,27 +77,6 @@ def get_ur_control_launch():
         launch_arguments=ur_control_launch_args.items(),
     )
 
-
-def get_moveit_launch():
-    """Configure MoveIt launch with a delay to ensure UR control is initialized."""
-    moveit_launch_args = {
-        'ur_type': ur_type,
-        'launch_rviz': 'true', 
-        'use_fake_hardware': use_fake_str,
-    }
-
-    return TimerAction(
-        period=4.0,  # Delay to prevent conflicts in RViz
-        actions=[
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(
-                    PathJoinSubstitution([FindPackageShare('ur_moveit_config'), 'launch', 'ur_moveit.launch.py'])
-                ),
-                launch_arguments=moveit_launch_args.items(),
-            )
-        ]
-    )
-
 def get_moveit_launch():
     moveit_launch_path = os.path.join(
         get_package_share_directory('ur10e_moveit_config'), 'launch', 'move_group.launch.py'
