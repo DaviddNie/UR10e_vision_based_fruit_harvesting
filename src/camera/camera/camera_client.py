@@ -28,9 +28,9 @@ class CameraClient(Node):
         # Split into command and parameters
         parts = input_str.split(maxsplit=1)
         command = parts[0].lower()
-        
+        print(command)
         # Validate command
-        if command not in ['detect', 'other_command']:  # Add other commands as needed
+        if command not in ['detect', 'detect_flip']:  # Add other commands as needed
             self.get_logger().error(f"Invalid command: {command}. Valid commands are: detect")
             return None
             
@@ -96,6 +96,7 @@ def print_usage():
     print("  Example: 'detect 47' - Detect objects of class 47 (apple)")
     print("  Commands:")
     print("    detect <class_id> - Detect objects of specified class")
+    print("    detect_flip <class_id> - Flip vertically first, then detect objects of specified class")
     print("    exit                 - Quit the program")
     print()
 

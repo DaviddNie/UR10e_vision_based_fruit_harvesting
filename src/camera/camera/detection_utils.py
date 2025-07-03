@@ -1,3 +1,4 @@
+import cv2
 from ultralytics import YOLO
 import numpy as np
 import asyncio
@@ -33,21 +34,27 @@ class DetectionHandler:
         self.current_depth = None
         
     async def handle_request(self, request):
-        if request.command == "detect":
+        if request.command.startswith("detect"):
             return await self._detect_objects(request)
         else:
             return {'success': False, 'message': f"Unknown command: {request.command}"}
     
     async def _detect_objects(self, request):
+
+        saved_frame = self.current_frame
+
+        if (request.command == 'detect_flip'):
+            saved_frame = cv2.flip(saved_frame, 0)
+
         """Async handler for detect command"""
-        if self.current_frame is None or self.current_depth is None:
+        if saved_frame is None or self.current_depth is None:
             return {
                 'success': False,
                 'message': "No frame available"
             }
             
         try:
-            results = self.model(self.current_frame, verbose=False)[0]
+            results = self.model(saved_frame, verbose=False)[0]
             boxes = results.boxes.xyxy.cpu().numpy()
             class_ids = results.boxes.cls.cpu().numpy()
             confidences = results.boxes.conf.cpu().numpy()
@@ -111,7 +118,7 @@ class DetectionHandler:
                             tf2_ros.ExtrapolationException) as e:
                         self.node.get_logger().error(f"TF transform failed: {str(e)}")
             
-            self.visualiser.update_cv_visualization(self.current_frame, self.last_detections)
+            self.visualiser.update_cv_visualization(saved_frame, self.last_detections)
 
             return {
                 'coordinates': detections,

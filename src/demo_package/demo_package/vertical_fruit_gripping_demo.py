@@ -113,21 +113,22 @@ class DemoRoutine(Node):
         while True:
             birds_eye_position_copy = copy.deepcopy(bird_eye_position)
             detected_apples = self.run_detection_at_pos(birds_eye_position_copy)
-
+            print(f"detected_apples are {detected_apples}")
+            
             if not detected_apples:
                 break
 
             # Tune the birds eye to focus on the first apple to guarentee gripping success
-            extracted_apple_height = detected_apples[0].z
+            extracted_apple_distance = detected_apples[0].x
             adjusted_birds_eye_position = copy.deepcopy(bird_eye_position)
-            adjusted_birds_eye_position[0] = detected_apples[0].x
+            adjusted_birds_eye_position[0] = extracted_apple_distance - 0.67
             adjusted_birds_eye_position[1] = detected_apples[0].y
-            adjusted_birds_eye_position[2] = extracted_apple_height + 0.67
+            adjusted_birds_eye_position[2] = detected_apples[0].z
 
             adjusted_above_drop_off_position = copy.deepcopy(drop_position)
 
             gripping_pos_array = self.run_detection_at_pos(adjusted_birds_eye_position)
-            filtered_pos_array = self.filter_apples_for_pickup(gripping_pos_array, extracted_apple_height)
+            filtered_pos_array = self.filter_apples_for_pickup(gripping_pos_array, extracted_apple_distance)
 
             if not filtered_pos_array:
                 break
@@ -138,11 +139,12 @@ class DemoRoutine(Node):
             # 3. Process each detected apple
             for apple in filtered_pos_array:
                 x, y, z = apple.x, apple.y, apple.z
-                above_apple_height = z + 0.5
+                above_apple_distance = x - 0.5
+                print(f"above_apple_distance is {above_apple_distance}")
 
-                above_apple = [x, y, above_apple_height, -1.56, -0.0, -1.571]
-                adjusted_above_drop_off_position[2] = above_apple_height
-                pick_position = [x, y, z + 0.19, -1.56, -0.0, -1.571]
+                above_apple = [above_apple_distance, y, z, -1.56, -0.0, -1.571]
+                adjusted_above_drop_off_position[0] = above_apple_distance
+                pick_position = [x - 0.19, y, z, -1.56, -0.0, -1.571]
 
 
                 self.get_logger().info(f"Processing apple at position: {x}, {y}, {z}")
@@ -220,13 +222,13 @@ class DemoRoutine(Node):
             self.get_logger().info("Max detection attempts reached with no apples found")
             return None
 
-    def filter_apples_for_pickup(self, pos_array, target_height, height_tolerance=0.05):
+    def filter_apples_for_pickup(self, pos_array, target_distance, distance_tolerance=0.05):
         """
         Filters apples to only those within height tolerance of target height.
         
         Args:
             pos_array: List of Point messages or arrays containing apple positions
-            target_height: Desired Z height (in meters)
+            target_distance: Desired distance between camera and item (in meters)
             height_tolerance: Allowed ± variation from target height (default: 0.15m)
         
         Returns:
@@ -235,7 +237,7 @@ class DemoRoutine(Node):
         filtered_apples = []
         
         for apple in pos_array: 
-            if abs(apple.z - target_height) <= height_tolerance:
+            if abs(apple.x - target_distance) <= distance_tolerance:
                 filtered_apples.append(apple)
         
         return filtered_apples
