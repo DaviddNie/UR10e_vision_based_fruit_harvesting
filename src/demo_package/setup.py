@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
 			'horizontal_fruit_gripping_demo = demo_package.horizontal_fruit_gripping_demo:main',
 			'vertical_fruit_gripping_demo = demo_package.vertical_fruit_gripping_demo:main',
+			'vertical_fruit_gripping_demo_tmp = demo_package.vertical_fruit_gripping_demo_tmp:main',
         ],
     },
 )

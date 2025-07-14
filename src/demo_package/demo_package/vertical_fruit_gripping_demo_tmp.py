@@ -116,8 +116,6 @@ class DemoRoutine(Node):
 
     def run_demo(self):
 
-        # self.send_movement_request(birds_eye_via_point)
-
         while True:
             initial_birds_eye_position_copy = copy.deepcopy(initial_bird_eye_position)
             detected_apples = self.run_detection_at_pos(initial_birds_eye_position_copy, SCAN_MODE)
@@ -127,32 +125,32 @@ class DemoRoutine(Node):
                 break
 
             # Tune the birds eye to focus on the first apple to guarentee gripping success
-            extracted_apple_distance = detected_apples[0].x
-            adjusted_birds_eye_position = copy.deepcopy(bird_eye_position)
-            adjusted_birds_eye_position[0] = extracted_apple_distance - 0.5
-            adjusted_birds_eye_position[1] = detected_apples[0].y
-            adjusted_birds_eye_position[2] = detected_apples[0].z - 0.1
+            # extracted_apple_distance = detected_apples[0].x
+            # adjusted_birds_eye_position = copy.deepcopy(bird_eye_position)
+            # adjusted_birds_eye_position[0] = extracted_apple_distance - 0.4
+            # adjusted_birds_eye_position[1] = detected_apples[0].y + 0.1
+            # adjusted_birds_eye_position[2] = detected_apples[0].z - 0.1
 
             adjusted_above_drop_off_position = copy.deepcopy(drop_position)
 
-            gripping_pos_array = self.run_detection_at_pos(adjusted_birds_eye_position, GRIP_MODE)
-            filtered_pos_array = self.filter_apples_for_pickup(gripping_pos_array, extracted_apple_distance)
+            # filtered_pos_array = self.run_detection_at_pos(adjusted_birds_eye_position, GRIP_MODE)
+            # filtered_pos_array = self.filter_apples_for_pickup(gripping_pos_array, extracted_apple_distance)
 
-            if not filtered_pos_array:
-                break
+            # if not filtered_pos_array:
+            #     break
 
             self.get_logger().info("gripper init")
             self.send_gripper_request(100)  # Open gripper
 
             # 3. Process each detected apple
-            for apple in filtered_pos_array:
+            for apple in detected_apples:
                 x, y, z = apple.x, apple.y, apple.z
                 above_apple_distance = x - 0.4
                 print(f"above_apple_distance is {above_apple_distance}")
 
-                above_apple = [above_apple_distance, y, z, -1.56, -0.0, -1.571]
+                above_apple = [above_apple_distance, y + 0.05, z - 0.07, -1.56, -0.0, -1.571]
                 adjusted_above_drop_off_position[0] = above_apple_distance
-                pick_position = [x - 0.19, y, z, -1.56, -0.0, -1.571]
+                pick_position = [x - 0.21, y + 0.05, z - 0.07, -1.56, -0.0, -1.571]
 
 
                 self.get_logger().info(f"Processing apple at position: {x}, {y}, {z}")
@@ -208,7 +206,7 @@ class DemoRoutine(Node):
                 if (position[2] >= 0.3 and attempt != 1 and mode == SCAN_MODE):
                     position[2] -= 0.07
                     position[3] += 0.1
-                elif (mode == GRIP_MODE):
+                elif (mode == GRIP_MODE and attempt != 1):
                     position[1] += 0.05
                     position[2] += 0.02
                     position[2] -= 0.05

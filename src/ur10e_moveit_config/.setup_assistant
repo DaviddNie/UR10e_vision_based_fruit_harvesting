@@ -8,19 +8,4 @@ moveit_setup_assistant_config:
   package_settings:
     author_name: David Nie
     author_email: z5303303@ad.unsw.edu.au
-    generated_timestamp: 1751257006
-  control_xacro:
-    command:
-      - position
-    state:
-      - position
-      - velocity
-  modified_urdf:
-    xacros:
-      - control_xacro
-  control_xacro:
-    command:
-      - position
-    state:
-      - position
-      - velocity
+    generated_timestamp: 1751872168

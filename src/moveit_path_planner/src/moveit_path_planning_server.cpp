@@ -33,10 +33,10 @@ public:
     );
 
     // Configure planner parameters
-    node_->declare_parameter("planning_time", 1.0);
-    node_->declare_parameter("goal_joint_tolerance", 0.01);  // Increased from 0.01
-    node_->declare_parameter("goal_position_tolerance", 0.01);  // Increased from 0.01
-    node_->declare_parameter("goal_orientation_tolerance", 0.01);  // Increased from 0.01
+    node_->declare_parameter("planning_time", 5.0);
+    node_->declare_parameter("goal_joint_tolerance", 0.05);  // Increased from 0.01
+    node_->declare_parameter("goal_position_tolerance", 0.05);  // Increased from 0.01
+    node_->declare_parameter("goal_orientation_tolerance", 0.05);  // Increased from 0.01
 
     setupCollisionObjects();
 
@@ -153,9 +153,9 @@ public:
     moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
 
     planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 0.04, 1.0, 0.70, -0.30, 0.5, frame_id, "backWall"));
-    planning_scene_interface.applyCollisionObject(generateCollisionObject(0.04, 1.2, 1.0, -0.25, 0.25, 0.5, frame_id, "sideWall"));
+    planning_scene_interface.applyCollisionObject(generateCollisionObject(0.04, 1.2, 1.0, -0.55, 0.25, 0.5, frame_id, "sideWall"));
     planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 2.4, 0.01, 0.85, 0.25, 0.013, frame_id, "table"));
-    planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 2.4, 0.04, 0.85, 0.25, 1.5, frame_id, "ceiling"));
+    planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 2.4, 0.04, 0.85, 0.25, 1.2, frame_id, "ceiling"));
   }
 
   auto generateCollisionObject(float sx, float sy, float sz, float x, float y, float z, const std::string& frame_id, const std::string& id) -> moveit_msgs::msg::CollisionObject {
@@ -208,4 +208,10 @@ int main(int argc, char** argv)
 // birds-eye for camera vertical
 // ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.64, 0.174, 1.041, -1.56, -0.0, -1.571]}"
 
+// ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.44, 0.174, 0.841, -1.56, -0.0, -1.571]}"
+// can't push past 0.75
+
+// ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.44, 0.16, 0.83,-1.687, 0, -1.61]}"
+
+// ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.471,0.149, 1.044, -1.978, 0.058, -1.549]}"
 // Object 1: X=1.248m, Y=-0.042m, Z=1.067m
