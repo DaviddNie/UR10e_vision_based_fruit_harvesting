@@ -4,8 +4,8 @@ from custom_interface.srv import CameraSrv, MovementRequest, GripperCmd, ResetGr
 from geometry_msgs.msg import Point
 import time
 import copy 
-NO_CONSTRAINT = 0
-ORIENTATION_CONSTRAINT = 1
+NO_CONSTRAINT = "NONE"
+DOWN_CONSTRAINT = "DOWN"
 
 # Horizontal Gripping Stretegy: Greedy + Visual Servoing
 
@@ -106,7 +106,7 @@ class DemoRoutine(Node):
             self.get_logger().error(f'Reset Gripper Service call failed: {e}')
             return None
 
-    def send_movement_request(self, positions, constraint = NO_CONSTRAINT):
+    def send_movement_request(self, positions, constraint = DOWN_CONSTRAINT):
         request = MovementRequest.Request()
         request.positions = positions
         request.constraints_identifier = constraint

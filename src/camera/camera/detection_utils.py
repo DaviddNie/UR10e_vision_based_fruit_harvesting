@@ -19,7 +19,7 @@ class DetectionHandler:
         self.bridge = CvBridge()
 
         camera_pkg_dir = get_package_share_directory('camera')
-        model_path = os.path.join(camera_pkg_dir, 'models', 'best.pt')
+        model_path = os.path.join(camera_pkg_dir, 'models', 'yolo11m.pt')
         # Load YOLO model from parameter
         self.model = YOLO(model_path)
         self.model.fuse()
@@ -63,7 +63,7 @@ class DetectionHandler:
             self.last_detections = []
 
             for i, (box, cls_id, conf) in enumerate(zip(boxes, class_ids, confidences)):
-                if cls_id == request.identifier and conf > 0.65:
+                if cls_id == request.identifier and conf > 0.3:
                     x_center = int((box[0] + box[2]) / 2)
                     y_center = int((box[1] + box[3]) / 2)
                     avg_depth = self.get_average_depth(int(x_center), int(y_center))

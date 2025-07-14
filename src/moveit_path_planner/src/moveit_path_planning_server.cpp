@@ -52,30 +52,48 @@ public:
     );
   }
 
-  moveit_msgs::msg::Constraints create_path_constraints() {
+ moveit_msgs::msg::Constraints set_orientation_constraint(const std::string& end_effector_orientation) {
     moveit_msgs::msg::Constraints constraints;
-
-    // End effector orientation constraint (facing downward)
     moveit_msgs::msg::OrientationConstraint orientation_constraint;
+
+    // Common setup for all orientations
     orientation_constraint.header.frame_id = move_group_->getPlanningFrame();
     orientation_constraint.link_name = move_group_->getEndEffectorLink();
-    
-    // Desired orientation (facing downward: Z-axis pointing down)
-    // This depends on your robot's URDF definition
-    tf2::Quaternion q;
-    q.setRPY(0, M_PI, 0);  // Roll=0, Pitch=π, Yaw=0 (facing downward)
-    orientation_constraint.orientation = tf2::toMsg(q);
-    
-    // Tolerance values (in radians)
-    orientation_constraint.absolute_x_axis_tolerance = 1;  // ~5.7 degrees
-    orientation_constraint.absolute_y_axis_tolerance = 1;
-    orientation_constraint.absolute_z_axis_tolerance = 1;
+    orientation_constraint.absolute_x_axis_tolerance = 1.0;  // ~57 degrees
+    orientation_constraint.absolute_y_axis_tolerance = 1.0;
+    orientation_constraint.absolute_z_axis_tolerance = 1.0;
     orientation_constraint.weight = 0.1;
+
+    // Set orientation based on input parameter
+    tf2::Quaternion q;
     
+    if (end_effector_orientation == DOWN) {
+        // Facing downward: Z-axis pointing down (Roll=0, Pitch=π, Yaw=0)
+        q.setRPY(0, M_PI, 0);
+    } 
+    else if (end_effector_orientation == LEFT) {
+        // Facing left: X-axis pointing left (Roll=0, Pitch=0, Yaw=π/2)
+        q.setRPY(0, 0, M_PI_2);
+    }
+    else if (end_effector_orientation == RIGHT) {
+        // Facing right: X-axis pointing right (Roll=0, Pitch=0, Yaw=-π/2)
+        q.setRPY(0, 0, -M_PI_2);
+    }
+    else if (end_effector_orientation == UP) {
+        // Facing upward: Z-axis pointing up (Roll=0, Pitch=0, Yaw=0)
+        q.setRPY(0, 0, 0);
+    }
+    else {
+        // Default to downward if unknown orientation is specified
+        RCLCPP_INFO(node_->get_logger(), "Unknown end_effector_orientation '%s'. Defaulting to 'down'.", end_effector_orientation.c_str());
+        q.setRPY(0, M_PI, 0);
+    }
+
+    orientation_constraint.orientation = tf2::toMsg(q);
     constraints.orientation_constraints.push_back(orientation_constraint);
 
     return constraints;
-  }
+}
 
   void handle_request(
     const std::shared_ptr<custom_interface::srv::MovementRequest::Request> request,
@@ -117,9 +135,10 @@ public:
     move_group_->setPoseTarget(target_pose);
     move_group_->clearPathConstraints();
 
-    if (request->constraints_identifier == ORIENTATION_CONSTRAINT) {
-      move_group_->setPathConstraints(create_path_constraints());
+    if (request->constraints_identifier != NONE) {
+      move_group_->setPathConstraints(set_orientation_constraint(request->constraints_identifier));
     }
+
     
     // Plan with retries
     moveit::planning_interface::MoveGroupInterface::Plan plan;
@@ -155,7 +174,7 @@ public:
     planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 0.04, 1.0, 0.70, -0.30, 0.5, frame_id, "backWall"));
     planning_scene_interface.applyCollisionObject(generateCollisionObject(0.04, 1.2, 1.0, -0.55, 0.25, 0.5, frame_id, "sideWall"));
     planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 2.4, 0.01, 0.85, 0.25, 0.013, frame_id, "table"));
-    planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 2.4, 0.04, 0.85, 0.25, 1.2, frame_id, "ceiling"));
+    planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 2.4, 0.04, 0.85, 0.25, 1.5, frame_id, "ceiling"));
   }
 
   auto generateCollisionObject(float sx, float sy, float sz, float x, float y, float z, const std::string& frame_id, const std::string& id) -> moveit_msgs::msg::CollisionObject {
@@ -189,7 +208,13 @@ private:
   sensor_msgs::msg::JointState::SharedPtr latest_joint_state_;
 
   const int NO_CONSTRAINT = 0;
-  const int ORIENTATION_CONSTRAINT = 1;
+  const int ORIENTATION_CONSTRAINT_DOWN = 1;
+  const int ORIENTATION_CONSTRAINT_LEFT = 2;
+  const std::string DOWN = "DOWN";
+  const std::string UP =  "UP";
+  const std::string LEFT = "LEFT";
+  const std::string RIGHT = "RIGHT";
+  const std::string NONE = "NONE";
 };
 
 int main(int argc, char** argv)

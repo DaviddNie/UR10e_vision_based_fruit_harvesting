@@ -4,8 +4,7 @@ from custom_interface.srv import CameraSrv, MovementRequest, GripperCmd, ResetGr
 from geometry_msgs.msg import Point
 import time
 import copy 
-NO_CONSTRAINT = 0
-ORIENTATION_CONSTRAINT = 1
+NO_CONSTRAINT = "NONE"
 
 # position [x, y, z, roll, pitch, yaw]
 bird_eye_position = [0.64, 0.174, 1.04, -1.56, -0.0, -1.571]

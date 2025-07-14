@@ -4,11 +4,11 @@ from custom_interface.srv import CameraSrv, MovementRequest, GripperCmd, ResetGr
 from geometry_msgs.msg import Point
 import time
 import copy 
-NO_CONSTRAINT = 0
-ORIENTATION_CONSTRAINT = 1
+NO_CONSTRAINT = "NONE"
 
 # position [x, y, z, roll, pitch, yaw]
-bird_eye_position = [0.64, 0.174, 1.04, -1.56, -0.0, -1.571]
+bird_eye_position = [0.44, 0.174, 1.0, -1.56, -0.0, -1.571]
+# bird_eye_position = [0.64, 0.174, 1.04, -1.56, -0.0, -1.571]
 # bird_eye_position = [0.44, 0.16, 0.83, -1.68, 0.0, -1.61]
 initial_bird_eye_position = [0.471,0.149, 1.044, -1.978, 0.058, -1.549]
 birds_eye_via_point = [0.822, 0.183, 0.856, 0.0, 3.14, 0.0]
@@ -119,8 +119,8 @@ class DemoRoutine(Node):
         # self.send_movement_request(birds_eye_via_point)
 
         while True:
-            initial_birds_eye_position_copy = copy.deepcopy(initial_bird_eye_position)
-            detected_apples = self.run_detection_at_pos(initial_birds_eye_position_copy, SCAN_MODE)
+            birds_eye_position_copy = copy.deepcopy(bird_eye_position)
+            detected_apples = self.run_detection_at_pos(birds_eye_position_copy, SCAN_MODE)
             print(f"detected_apples are {detected_apples}")
             
             if not detected_apples:
@@ -147,12 +147,14 @@ class DemoRoutine(Node):
             # 3. Process each detected apple
             for apple in filtered_pos_array:
                 x, y, z = apple.x, apple.y, apple.z
-                above_apple_distance = x - 0.4
+                above_apple_distance = x - 0.5
+                y_compensation = y + 0.06
+                z_compensation = z - 0.03
                 print(f"above_apple_distance is {above_apple_distance}")
 
-                above_apple = [above_apple_distance, y, z, -1.56, -0.0, -1.571]
+                above_apple = [above_apple_distance, y_compensation, z_compensation, -1.56, -0.0, -1.571]
                 adjusted_above_drop_off_position[0] = above_apple_distance
-                pick_position = [x - 0.19, y, z, -1.56, -0.0, -1.571]
+                pick_position = [x - 0.18, y_compensation, z_compensation, -1.56, -0.0, -1.571]
 
 
                 self.get_logger().info(f"Processing apple at position: {x}, {y}, {z}")
@@ -167,7 +169,7 @@ class DemoRoutine(Node):
                 
                 # 3.3 Grip the apple
                 self.get_logger().info("Gripping apple")
-                self.send_gripper_request(0)  # Close gripper # 78mm is used as 0mm would trigger a safety fault
+                # self.send_gripper_request(0)  # Close gripper # 78mm is used as 0mm would trigger a safety fault
                 
                 time.sleep(0.5)
                 
@@ -181,10 +183,10 @@ class DemoRoutine(Node):
 
                 # 3.4 Move horizontally to above the drop position
                 self.get_logger().info("Moving to drop position")
-                self.send_movement_request(adjusted_above_drop_off_position)
+                # self.send_movement_request(adjusted_above_drop_off_position)
 
                 # 3.5 Move to drop position
-                self.send_movement_request(drop_position)
+                # self.send_movement_request(drop_position)
                 
                 # 3.6 Release the apple
                 self.get_logger().info("Releasing apple")
@@ -265,6 +267,7 @@ def main(args=None):
 if __name__ == '__main__':
     main()
 
+# 0.9 flat
 # ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.64, 0.174, 0.9, -1.56, -0.0, -1.571]}"
 
 # ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.595, 0.183, 0.811, 1.492, 0.06, 1.507]}"
