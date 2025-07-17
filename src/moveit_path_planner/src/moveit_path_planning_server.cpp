@@ -57,48 +57,109 @@ public:
     );
   }
 
- moveit_msgs::msg::Constraints set_orientation_constraint(const std::string& end_effector_orientation) {
-    moveit_msgs::msg::Constraints constraints;
-    moveit_msgs::msg::OrientationConstraint orientation_constraint;
+	moveit_msgs::msg::Constraints set_constraint(const std::string& constraint_str) {
+		moveit_msgs::msg::Constraints constraints;
+	
+		if (str_contains(constraint_str, ORIEN)) {
+			RCLCPP_INFO(node_->get_logger(), "should not be triggered.");
+			constraints.orientation_constraints.push_back(set_orientation_constraint(constraint_str));
+		}
 
-    // Common setup for all orientations
-    orientation_constraint.header.frame_id = move_group_->getPlanningFrame();
-    orientation_constraint.link_name = move_group_->getEndEffectorLink();
-    orientation_constraint.absolute_x_axis_tolerance = 1.0;  // ~57 degrees
-    orientation_constraint.absolute_y_axis_tolerance = 1.0;
-    orientation_constraint.absolute_z_axis_tolerance = 1.0;
-    orientation_constraint.weight = 0.1;
+		// Joint Constraints
 
-    // Set orientation based on input parameter
-    tf2::Quaternion q;
-    
-    if (end_effector_orientation == DOWN) {
-        // Facing downward: Z-axis pointing down (Roll=0, Pitch=π, Yaw=0)
-        q.setRPY(0, M_PI, 0);
-    } 
-    else if (end_effector_orientation == LEFT) {
-        // Facing left: X-axis pointing left (Roll=0, Pitch=0, Yaw=π/2)
-        q.setRPY(0, 0, M_PI_2);
-    }
-    else if (end_effector_orientation == RIGHT) {
-        // Facing right: X-axis pointing right (Roll=0, Pitch=0, Yaw=-π/2)
-        q.setRPY(0, 0, -M_PI_2);
-    }
-    else if (end_effector_orientation == UP) {
-        // Facing upward: Z-axis pointing up (Roll=0, Pitch=0, Yaw=0)
-        q.setRPY(0, 0, 0);
-    }
-    else {
-        // Default to downward if unknown orientation is specified
-        RCLCPP_INFO(node_->get_logger(), "Unknown end_effector_orientation '%s'. Defaulting to 'down'.", end_effector_orientation.c_str());
-        q.setRPY(0, M_PI, 0);
-    }
+		// Elbow -> no less than 60
+		//       -> no more than 150
+		// Joint constraint for elbow (50° to 145°)
 
-    orientation_constraint.orientation = tf2::toMsg(q);
-    constraints.orientation_constraints.push_back(orientation_constraint);
+		if (str_contains(constraint_str, ELBOW)) {
+			moveit_msgs::msg::JointConstraint elbow_constraint;
+			elbow_constraint.joint_name = "elbow_joint";
+			
+			// Convert degrees to radians
+			const double min_angle = 60.0 * M_PI / 180.0;   // 60° in radians (~1.0472)
+			const double max_angle = 150.0 * M_PI / 180.0;  // 150° in radians (~2.6179)
+			
+			// Calculate midpoint (105° which is between 60° and 150°)
+			const double midpoint = (min_angle + max_angle) / 2.0;  // ~1.8326 radians
+			
+			// Set constraints
+			elbow_constraint.position = midpoint;
+			elbow_constraint.tolerance_below = midpoint - min_angle;  // ~0.7854 radians (45°)
+			elbow_constraint.tolerance_above = max_angle - midpoint;  // ~0.7854 radians (45°)
+			elbow_constraint.weight = 1.0;
+			
+			RCLCPP_INFO(node_->get_logger(), "elbow constraint implemented.");
+			
+			constraints.joint_constraints.push_back(elbow_constraint);
+		}
 
-    return constraints;
-}
+		if (str_contains(constraint_str, WRIST_1)) {
+			moveit_msgs::msg::JointConstraint wrist_constraint;
+			wrist_constraint.joint_name = "wrist_1_joint";
+			
+			// Convert degrees to radians (-71° to -218°)
+			const double min_angle = -218.0 * M_PI / 180.0;  // ≈ -3.8048 radians
+			const double mid_angle = -144.5 * M_PI / 180.0;  // Midpoint (-144.5° ≈ -2.5220 rad)
+			const double max_angle = -71.0 * M_PI / 180.0;   // ≈ -1.2392 radians
+		
+			// Configure constraint
+			wrist_constraint.position = mid_angle;           // Center of range
+			wrist_constraint.tolerance_below = mid_angle - min_angle;  // ≈ 1.2828 rad
+			// wrist_constraint.tolerance_below = 0.01;
+			// wrist_constraint.tolerance_above = 0.01;
+			wrist_constraint.tolerance_above = max_angle - mid_angle;  // ≈ 1.2828 rad
+			wrist_constraint.weight = 1.0;
+			
+			constraints.joint_constraints.push_back(wrist_constraint);
+		}
+
+		return constraints;
+	}
+
+	// -1.389
+	//- -3.691542764703268
+
+	// actual value: 3.361864
+
+	// -3.926776
+
+	// -1.244382
+
+	moveit_msgs::msg::OrientationConstraint set_orientation_constraint(const std::string& orien_constraint_str) {
+		moveit_msgs::msg::OrientationConstraint orientation_constraint;
+
+		// Common setup for all orientations
+		orientation_constraint.header.frame_id = move_group_->getPlanningFrame();
+		orientation_constraint.link_name = move_group_->getEndEffectorLink();
+		orientation_constraint.absolute_x_axis_tolerance = 0.001;
+		orientation_constraint.absolute_y_axis_tolerance = 0.001;
+		orientation_constraint.absolute_z_axis_tolerance = 0.001;
+		orientation_constraint.weight = 1;
+	
+		// Set orientation based on input parameter
+		tf2::Quaternion q;
+		
+		if (str_contains(orien_constraint_str, DOWN)) {
+			// Facing downward: Z-axis pointing down (Roll=0, Pitch=π, Yaw=0)
+			q.setRPY(0, M_PI, 0);
+		} 
+		else if (str_contains(orien_constraint_str, LEFT)) {
+			// Facing left: X-axis pointing left (Roll=0, Pitch=0, Yaw=π/2)
+			q.setRPY(0, 0, M_PI_2);
+		}
+		else if (str_contains(orien_constraint_str, RIGHT)) {
+			// Facing right: X-axis pointing right (Roll=0, Pitch=0, Yaw=-π/2)
+			q.setRPY(0, 0, -M_PI_2);
+		}
+		else if (str_contains(orien_constraint_str, UP)) {
+			// Facing upward: Z-axis pointing up (Roll=0, Pitch=0, Yaw=0)
+			q.setRPY(0, 0, 0);
+		}
+	
+		orientation_constraint.orientation = tf2::toMsg(q);
+
+		return orientation_constraint;
+	}
 
   void handle_request(
     const std::shared_ptr<custom_interface::srv::MovementRequest::Request> request,
@@ -141,7 +202,7 @@ public:
     move_group_->clearPathConstraints();
 
     if (request->constraints_identifier != NONE) {
-      move_group_->setPathConstraints(set_orientation_constraint(request->constraints_identifier));
+      move_group_->setPathConstraints(set_constraint(request->constraints_identifier));
     }
 
     
@@ -204,6 +265,11 @@ public:
     return collision_object;
   }
 
+  bool str_contains(const std::string& str, const std::string& substr) {
+    if (substr.empty()) return false;
+    return str.find(substr) != std::string::npos;
+  }
+
 private:
   rclcpp::Node::SharedPtr node_;
   std::shared_ptr<moveit::planning_interface::MoveGroupInterface> move_group_;
@@ -220,6 +286,10 @@ private:
   const std::string LEFT = "LEFT";
   const std::string RIGHT = "RIGHT";
   const std::string NONE = "NONE";
+  const std::string VER_ELBOW = "LEFT_ELBOW";
+  const std::string ELBOW = "ELBOW";
+  const std::string ORIEN = "ORIEN";
+  const std::string WRIST_1= "WRIST1";
 };
 
 int main(int argc, char** argv)

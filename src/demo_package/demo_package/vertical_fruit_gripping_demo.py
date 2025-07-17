@@ -5,6 +5,8 @@ from geometry_msgs.msg import Point
 import time
 import copy 
 NO_CONSTRAINT = "NONE"
+VER_ELBOW = "ELBOW"
+VER_ELBOW_WRIST1 = "ELBOW_WRIST1"
 
 # position [x, y, z, roll, pitch, yaw]
 bird_eye_position = [0.44, 0.174, 1.0, -1.56, -0.0, -1.571]
@@ -135,7 +137,7 @@ class DemoRoutine(Node):
 
             adjusted_above_drop_off_position = copy.deepcopy(drop_position)
 
-            gripping_pos_array = self.run_detection_at_pos(adjusted_birds_eye_position, GRIP_MODE)
+            gripping_pos_array = self.run_detection_at_pos(adjusted_birds_eye_position, SCAN_MODE)
             filtered_pos_array = self.filter_apples_for_pickup(gripping_pos_array, extracted_apple_distance)
 
             if not filtered_pos_array:
@@ -175,11 +177,11 @@ class DemoRoutine(Node):
                 
                 # 3.4 Lift the apple
                 self.get_logger().info("Lifting apple")
-                self.send_movement_request(above_apple)
+                # self.send_movement_request(above_apple)
                 
                 # 3.3.1 Reset Gripper in case of a safety fault
                 self.get_logger().info("reset gripper")
-                self.send_reset_gripper_request(True)
+                # self.send_reset_gripper_request(True)
 
                 # 3.4 Move horizontally to above the drop position
                 self.get_logger().info("Moving to drop position")
@@ -190,7 +192,7 @@ class DemoRoutine(Node):
                 
                 # 3.6 Release the apple
                 self.get_logger().info("Releasing apple")
-                self.send_gripper_request(100)  # Open gripper
+                # self.send_gripper_request(100)  # Open gripper
                                 
             # After processing all apples, loop will repeat detection
         
@@ -207,9 +209,10 @@ class DemoRoutine(Node):
                 attempt += 1
                 self.get_logger().info(f"Detection attempt {attempt}/{max_attempts}")
                 
-                if (position[2] >= 0.3 and attempt != 1 and mode == SCAN_MODE):
-                    position[2] -= 0.07
-                    position[3] += 0.1
+                if (attempt != 1 and mode == SCAN_MODE):
+                    position[1] -= 0.08
+                    position[2] += 0.15
+                    position[3] -= 0.3
                 elif (mode == GRIP_MODE):
                     position[1] += 0.05
                     position[2] += 0.02
@@ -235,7 +238,7 @@ class DemoRoutine(Node):
             self.get_logger().info("Max detection attempts reached with no apples found")
             return None
 
-    def filter_apples_for_pickup(self, pos_array, target_distance, distance_tolerance=0.05):
+    def filter_apples_for_pickup(self, pos_array, target_distance, distance_tolerance=0.01):
         """
         Filters apples to only those within height tolerance of target height.
         
@@ -271,3 +274,4 @@ if __name__ == '__main__':
 # ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.64, 0.174, 0.9, -1.56, -0.0, -1.571]}"
 
 # ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.595, 0.183, 0.811, 1.492, 0.06, 1.507]}"
+

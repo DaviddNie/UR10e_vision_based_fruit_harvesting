@@ -19,7 +19,7 @@ class DetectionHandler:
         self.bridge = CvBridge()
 
         camera_pkg_dir = get_package_share_directory('camera')
-        model_path = os.path.join(camera_pkg_dir, 'models', 'yolo11m.pt')
+        model_path = os.path.join(camera_pkg_dir, 'models', 'best.pt')
         # Load YOLO model from parameter
         self.model = YOLO(model_path)
         self.model.fuse()
