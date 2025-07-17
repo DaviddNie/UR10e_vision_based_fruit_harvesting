@@ -34,9 +34,14 @@ public:
 
     // Configure planner parameters
     node_->declare_parameter("planning_time", 5.0);
-    node_->declare_parameter("goal_joint_tolerance", 0.05);  // Increased from 0.01
-    node_->declare_parameter("goal_position_tolerance", 0.05);  // Increased from 0.01
-    node_->declare_parameter("goal_orientation_tolerance", 0.05);  // Increased from 0.01
+
+    // IMPORTANT!!!!!!!!!!!!!!!!!
+    // Refrain urself from loosing the tolerance, if the planning is slow, it's probably not the fault of the tolerance
+    // Why?
+    // If you increase it to 0.05, there will be a max goal displacement of 0.05m in all axis, that's a nightmare to tune
+    node_->declare_parameter("goal_joint_tolerance", 0.001);
+    node_->declare_parameter("goal_position_tolerance", 0.001);  
+    node_->declare_parameter("goal_orientation_tolerance", 0.001);  
 
     setupCollisionObjects();
 
