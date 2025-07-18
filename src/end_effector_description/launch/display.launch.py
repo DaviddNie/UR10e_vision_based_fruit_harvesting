@@ -22,7 +22,7 @@ if not use_fake:
 
 
 def get_realsense_launch():
-    """Setup Realsense camera launch if using real hardware."""
+    """Setup Realsense camera launch with complete pointcloud configuration."""
     realsense_launch_path = os.path.join(
         get_package_share_directory('realsense2_camera'), 'launch', 'rs_launch.py'
     )
@@ -35,17 +35,19 @@ def get_realsense_launch():
             'align_depth.enable': 'true',
             'enable_color': 'true',
             'enable_depth': 'true',
-            'pointcloud.enable': 'true'
+            'pointcloud.enable': 'true',
+            'color_width': '640',
+            'color_height': '480',
+            'color_fps': '5',
+            'depth_width': '640',
+            'depth_height': '480',
+            'depth_fps': '5',
+            'pointcloud_texture_stream': 'RS2_STREAM_COLOR',
+            'pointcloud_texture_index': '0',
+            'filters': 'pointcloud',
+            'allow_no_texture_points': 'false'
         }.items()
     )
-
-# ros2 launch ur_robot_driver ur_control.launch.py \
-#     ur_type:='ur10e' \
-#     robot_ip:='<your_robot_ip>' \
-#     use_fake_hardware:='<true_or_false>' \
-#     launch_rviz:='false' \
-#     description_file:="$(ros2 pkg prefix end_effector_description)/share/end_effector_description/urdf/end_effector_withDriverSupport.xacro" \
-#     kinematics_params_file:="$(ros2 pkg prefix end_effector_description)/share/end_effector_description/etc/robot_calibration.yaml"
 
 def get_ur_control_launch():
     """Configure UR control launch for the UR10e arm."""

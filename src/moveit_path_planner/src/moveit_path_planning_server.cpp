@@ -50,6 +50,7 @@ public:
     move_group_->setGoalJointTolerance(node_->get_parameter("goal_joint_tolerance").as_double());
     move_group_->setGoalPositionTolerance(node_->get_parameter("goal_position_tolerance").as_double());
     move_group_->setGoalOrientationTolerance(node_->get_parameter("goal_orientation_tolerance").as_double());
+    move_group_->setPlannerId("RRTsharp");
 
     service_ = node_->create_service<custom_interface::srv::MovementRequest>(
       "/moveit_path_plan",
@@ -84,7 +85,7 @@ public:
 			
 			// Set constraints
 			elbow_constraint.position = midpoint;
-			elbow_constraint.tolerance_below = midpoint - min_angle;  // ~0.7854 radians (45°)
+			elbow_constraint.tolerance_below = 1.0;  // ~0.7854 radians (45°)
 			elbow_constraint.tolerance_above = max_angle - midpoint;  // ~0.7854 radians (45°)
 			elbow_constraint.weight = 1.0;
 			
@@ -98,16 +99,16 @@ public:
 			wrist_constraint.joint_name = "wrist_1_joint";
 			
 			// Convert degrees to radians (-71° to -218°)
-			const double min_angle = -218.0 * M_PI / 180.0;  // ≈ -3.8048 radians
-			const double mid_angle = -144.5 * M_PI / 180.0;  // Midpoint (-144.5° ≈ -2.5220 rad)
-			const double max_angle = -71.0 * M_PI / 180.0;   // ≈ -1.2392 radians
+			const double min_angle = 218.0 * M_PI / 180.0;  // ≈ -3.8048 radians
+			const double mid_angle = 144.5 * M_PI / 180.0;  // Midpoint (-144.5° ≈ -2.5220 rad)
+			const double max_angle = 71.0 * M_PI / 180.0;   // ≈ -1.2392 radians
 		
 			// Configure constraint
 			wrist_constraint.position = mid_angle;           // Center of range
-			wrist_constraint.tolerance_below = mid_angle - min_angle;  // ≈ 1.2828 rad
+			wrist_constraint.tolerance_below = 1.7;
 			// wrist_constraint.tolerance_below = 0.01;
 			// wrist_constraint.tolerance_above = 0.01;
-			wrist_constraint.tolerance_above = max_angle - mid_angle;  // ≈ 1.2828 rad
+			wrist_constraint.tolerance_above = 1.2828;
 			wrist_constraint.weight = 1.0;
 			
 			constraints.joint_constraints.push_back(wrist_constraint);
@@ -210,7 +211,7 @@ public:
     moveit::planning_interface::MoveGroupInterface::Plan plan;
     bool success = false;
     int attempts = 0;
-    const int max_attempts = 2;
+    const int max_attempts = 1000;
     
     while (!success && attempts < max_attempts) {
       success = (move_group_->plan(plan) == moveit::core::MoveItErrorCode::SUCCESS);
