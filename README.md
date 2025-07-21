@@ -1,4 +1,4 @@
-# This is a temporary solution while MoMa is being fixed
+# Vision-based fruit havesting
 
 ### Robot: UR10e
 ### Gripper: OnRobot RG2 V2 + Quick Changer (QC)
@@ -31,3 +31,7 @@ If that worked, we are now ready to launch the gripper package
 
 In one terminal: `ros2 run gripper gripper_server`
 In another terminal: `ros2 run gripper gripper_client`
+
+### End-effector Visualisation
+
+![](img/end_effector_visualisation.png)

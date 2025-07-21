@@ -133,79 +133,19 @@ Visualization Manager:
         Value: /detected_objects
       Value: true
     - Class: rviz_default_plugins/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        QC:
-          Value: false
-        base:
-          Value: false
-        base_link:
-          Value: false
-        base_link_inertia:
-          Value: false
-        camera:
-          Value: false
-        camera_link:
-          Value: false
-        end_effector_root_link:
-          Value: false
-        flange:
-          Value: false
-        forearm_link:
-          Value: false
-        ft_frame:
-          Value: false
-        gripper:
-          Value: false
-        shoulder_link:
-          Value: false
-        tool0:
-          Value: false
-        tool0_controller:
-          Value: false
-        upper_arm_link:
-          Value: false
-        world:
-          Value: false
-        wrist_1_link:
-          Value: false
-        wrist_2_link:
-          Value: false
-        wrist_3_link:
-          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        world:
-          base_link:
-            base:
-              tool0_controller:
-                {}
-            base_link_inertia:
-              shoulder_link:
-                upper_arm_link:
-                  forearm_link:
-                    wrist_1_link:
-                      wrist_2_link:
-                        wrist_3_link:
-                          flange:
-                            camera_link:
-                              {}
-                            tool0:
-                              end_effector_root_link:
-                                camera:
-                                  QC:
-                                    gripper:
-                                      {}
-                          ft_frame:
-                            {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -366,25 +306,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 2.293473720550537
+      Distance: 1.1427444219589233
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.30743640661239624
-        Y: -0.06295915693044662
-        Z: 0.3875187933444977
-      Focal Shape Fixed Size: true
+        X: 0.8191947340965271
+        Y: 0.1363007128238678
+        Z: 0.44334346055984497
+      Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.23000018298625946
+      Pitch: -0.019601192325353622
       Target Frame: world
       Value: Orbit (rviz_default_plugins)
-      Yaw: 0.03700297325849533
+      Yaw: 1.0122337341308594
     Saved: ~
 Window Geometry:
   Displays:
