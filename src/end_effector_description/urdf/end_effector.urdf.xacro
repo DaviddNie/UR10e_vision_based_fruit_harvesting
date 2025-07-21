@@ -1,0 +1,63 @@
+<?xml version="1.0" ?>
+<robot name="end_effector" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Constants -->
+  <xacro:property name="scale_factor" value="0.001"/>
+  <xacro:property name="mass_value" value="0.5"/>
+  <xacro:property name="inertia_value" value="1.0"/>
+
+  <!-- Reusable macro to define a mesh-based link -->
+  <xacro:macro name="add_mesh_link" params="name mesh_path">
+    <link name="${name}">
+      <visual>
+        <geometry>
+          <mesh filename="${mesh_path}" scale="${scale_factor} ${scale_factor} ${scale_factor}"/>
+        </geometry>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="${mesh_path}" scale="${scale_factor} ${scale_factor} ${scale_factor}"/>
+        </geometry>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="${mass_value}"/>
+        <inertia ixx="${inertia_value}" ixy="0.0" ixz="0.0"
+                 iyy="${inertia_value}" iyz="0.0"
+                 izz="${inertia_value}"/>
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <!-- Main end-effector macro -->
+  <xacro:macro name="end_effector" params="prefix parent">
+    
+    <!-- camera link -->
+    <xacro:add_mesh_link name="${prefix}camera" mesh_path="package://end_effector_description/meshes/camera.stl"/>
+    <joint name="${prefix}end_effector_flange" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${prefix}camera"/>
+      <origin xyz="-0.02 -0.05 -0.135" rpy="${pi/2} 0 0"/>
+    </joint>
+
+    <!-- QC link, 5 cm above camera -->
+    <xacro:add_mesh_link name="${prefix}QC" mesh_path="package://end_effector_description/meshes/QC.stl"/>
+    <joint name="${prefix}camera2QC_joint" type="fixed">
+      <parent link="${prefix}camera"/>
+      <child link="${prefix}QC"/>
+      <origin xyz="0.02 0.147 -0.05" rpy="${pi} ${-pi/2} 0"/>
+    </joint>
+
+    <!-- Gripper link, 5 cm above QC -->
+    <xacro:add_mesh_link name="${prefix}gripper" mesh_path="package://end_effector_description/meshes/RG2.stl"/>
+    <joint name="${prefix}QC2Gripper_joint" type="fixed">
+      <parent link="${prefix}QC"/>
+      <child link="${prefix}gripper"/>
+      <origin xyz="0 -0.067 -0.025" rpy="${-pi/2} ${pi} ${pi/2}"/>
+    </joint>
+
+  </xacro:macro>
+
+</robot>
