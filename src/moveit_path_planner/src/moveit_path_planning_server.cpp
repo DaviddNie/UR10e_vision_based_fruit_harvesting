@@ -211,7 +211,7 @@ public:
     moveit::planning_interface::MoveGroupInterface::Plan plan;
     bool success = false;
     int attempts = 0;
-    const int max_attempts = 1000;
+    const int max_attempts = 3;
     
     while (!success && attempts < max_attempts) {
       success = (move_group_->plan(plan) == moveit::core::MoveItErrorCode::SUCCESS);
