@@ -108,6 +108,7 @@ class DemoRoutine(Node):
 
     def send_movement_request(self, positions, constraint = DOWN_CONSTRAINT):
         request = MovementRequest.Request()
+        request.command = "cartesian"
         request.positions = positions
         request.constraints_identifier = constraint
 

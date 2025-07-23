@@ -112,13 +112,13 @@ def generate_launch_description():
     """Main function to generate the complete launch description."""
     launch_description = [
         get_ur_control_launch(),
-        # get_moveit_launch(),
+        get_moveit_launch(),
         get_rviz_launch(),
     ]
 
     # Only add camera launch if using real hardware
-    # if not use_fake:
-    #     launch_description.append(get_realsense_launch())
-    #     launch_description.append(get_auxiliary_launch())
+    if not use_fake:
+        launch_description.append(get_realsense_launch())
+        launch_description.append(get_auxiliary_launch())
 
     return LaunchDescription(launch_description)

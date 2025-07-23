@@ -15,7 +15,7 @@
   <link name="simple_ee_link">
     <visual>
       <geometry>
-        <box size="0.15 0.15 0.3"/>  <!-- Length, Width, Height -->
+        <box size="0.15 0.15 0.2"/>  <!-- Length, Width, Height -->
       </geometry>
       <material name="orange">
         <color rgba="1.0 0.5 0.0 1.0"/>
@@ -23,7 +23,7 @@
     </visual>
     <collision>
       <geometry>
-        <box size="0.15 0.15 0.3"/>  <!-- Must match visual -->
+        <box size="0.15 0.15 0.2"/>  <!-- Must match visual -->
       </geometry>
     </collision>
     <inertial>
@@ -40,7 +40,7 @@
   <joint name="simple_ee_joint" type="fixed">
     <parent link="tool0"/>
     <child link="simple_ee_link"/>
-    <origin xyz="0 -0.02 0.16" rpy="0 0 0"/>  <!-- 1cm offset from tool0 -->
+    <origin xyz="0 -0.02 0.11" rpy="0 0 0"/>  <!-- 1cm offset from tool0 -->
 
   </joint>
 
