@@ -165,48 +165,64 @@ public:
   void handle_request(
     const std::shared_ptr<custom_interface::srv::MovementRequest::Request> request,
     std::shared_ptr<custom_interface::srv::MovementRequest::Response> response)
-  {
-    RCLCPP_INFO(node_->get_logger(), "Received MoveIt path planning request.");
+{
+    RCLCPP_INFO(node_->get_logger(), "Received MoveIt path planning request. Command: %s", request->command.c_str());
 
-    const std::vector<double>& positions = request->positions;
-
-    if (positions.size() != 6) {
-      RCLCPP_ERROR(node_->get_logger(), "Expected 6 pose elements (x, y, z, roll, pitch, yaw), got %zu", positions.size());
-      response->success = false;
-      return;
+    if (request->positions.size() != 6) {
+        RCLCPP_ERROR(node_->get_logger(), "Expected 6 position elements, got %zu", request->positions.size());
+        response->success = false;
+        return;
     }
-    
-    // Extract Cartesian position and orientation
-    double x = positions[0];
-    double y = positions[1];
-    double z = positions[2];
-    double roll = positions[3];
-    double pitch = positions[4];
-    double yaw = positions[5];
 
-    // Convert RPY to Quaternion
-    tf2::Quaternion q;
-    q.setRPY(roll, pitch, yaw);
-    q.normalize();  // Optional but recommended
-    
-    geometry_msgs::msg::Pose target_pose;
-    target_pose.position.x = x;
-    target_pose.position.y = y;
-    target_pose.position.z = z;
-    target_pose.orientation.x = q.x();
-    target_pose.orientation.y = q.y();
-    target_pose.orientation.z = q.z();
-    target_pose.orientation.w = q.w();
-    
-    // Set Cartesian pose target
-    move_group_->setPoseTarget(target_pose);
+    // Clear previous targets and constraints
+    move_group_->clearPoseTargets();
     move_group_->clearPathConstraints();
 
-    if (request->constraints_identifier != NONE) {
-      move_group_->setPathConstraints(set_constraint(request->constraints_identifier));
+    // Handle Cartesian or Joint command
+    if (request->command == "cartesian") {
+        // Cartesian pose target
+        double x = request->positions[0];
+        double y = request->positions[1];
+        double z = request->positions[2];
+        double roll = request->positions[3];
+        double pitch = request->positions[4];
+        double yaw = request->positions[5];
+
+        tf2::Quaternion q;
+        q.setRPY(roll, pitch, yaw);
+        q.normalize();
+        
+        geometry_msgs::msg::Pose target_pose;
+        target_pose.position.x = x;
+        target_pose.position.y = y;
+        target_pose.position.z = z;
+        target_pose.orientation = tf2::toMsg(q);
+        
+        move_group_->setPoseTarget(target_pose);
+    }
+    else if (request->command == "joint") {
+        // Joint value target
+        std::map<std::string, double> joint_targets = {
+            {"shoulder_pan_joint", request->positions[5]},  // Last element for pan
+            {"shoulder_lift_joint", request->positions[0]},
+            {"elbow_joint", request->positions[1]},
+            {"wrist_1_joint", request->positions[2]},
+            {"wrist_2_joint", request->positions[3]},
+            {"wrist_3_joint", request->positions[4]}
+        };
+        move_group_->setJointValueTarget(joint_targets);
+    }
+    else {
+        RCLCPP_ERROR(node_->get_logger(), "Invalid command: %s (must be 'cartesian' or 'joint')", request->command.c_str());
+        response->success = false;
+        return;
     }
 
-    
+    // Apply constraints if specified
+    if (request->constraints_identifier != NONE) {
+        move_group_->setPathConstraints(set_constraint(request->constraints_identifier));
+    }
+
     // Plan with retries
     moveit::planning_interface::MoveGroupInterface::Plan plan;
     bool success = false;
@@ -214,25 +230,23 @@ public:
     const int max_attempts = 1000;
     
     while (!success && attempts < max_attempts) {
-      success = (move_group_->plan(plan) == moveit::core::MoveItErrorCode::SUCCESS);
-      attempts++;
-      if (!success) {
-        RCLCPP_WARN(node_->get_logger(), "Planning attempt %d failed, retrying...", attempts);
-        move_group_->setPlanningTime(move_group_->getPlanningTime() + 2.0);
-      }
+        success = (move_group_->plan(plan) == moveit::core::MoveItErrorCode::SUCCESS);
+        attempts++;
+        if (!success) {
+            RCLCPP_WARN(node_->get_logger(), "Planning attempt %d failed, retrying...", attempts);
+            move_group_->setPlanningTime(move_group_->getPlanningTime() + 2.0);
+        }
     }
     
     if (success) {
-      RCLCPP_INFO(node_->get_logger(), "Plan successful after %d attempts. Executing...", attempts);
-
-      move_group_->execute(plan);
-      response->success = true;
+        RCLCPP_INFO(node_->get_logger(), "Plan successful after %d attempts. Executing...", attempts);
+        move_group_->execute(plan);
+        response->success = true;
     } else {
-      RCLCPP_ERROR(node_->get_logger(), "Planning failed after %d attempts.", max_attempts);
-      response->success = false;
+        RCLCPP_ERROR(node_->get_logger(), "Planning failed after %d attempts.", max_attempts);
+        response->success = false;
     }
-
-  }
+}
 
   void setupCollisionObjects() {
     std::string frame_id = "world";
@@ -316,3 +330,29 @@ int main(int argc, char** argv)
 
 // ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.471,0.149, 1.044, -1.978, 0.058, -1.549]}"
 // Object 1: X=1.248m, Y=-0.042m, Z=1.067m
+
+// ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{command: 'joint', positions: [0.0, -1.30899, 1.5708, -1.8326, -1.5708, 0.0], constraints_identifier: '0'}"
+// ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{command: 'joint', positions: [-1.3, -1.57, -1.83, -1.57, 0, 0], constraints_identifier: '0'}"
+
+
+// [0.0, -1.30899, 1.5708, -1.8326, -1.5708, 0.0]
+// [-1.3, -1.57, -1.83, -1.57, 0, 0]
+// - -1.3087534469417115
+// - 1.5703657309161585
+// - -1.8321496448912562
+// - -1.577447239552633
+// - 0.0002888917806558311
+// - 0.0008928418392315507
+
+// [-1.3, 1.57, -1.83, -1.57, 0, 0]
+
+// - -0.0009640020183105946
+// - -1.3001550436019897
+// - 1.570777340526245
+// - -1.8295820395099085
+// - -1.5706284681903284
+// - -0.00034553209413701325
+// []
+
+// Home pose Joint
+// ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{command: 'joint', positions: [-1.3, 1.57, -1.83, -1.57, 0, 0], constraints_identifier: '0'}"
