@@ -3,7 +3,7 @@
 
 <robot name="end_effector_withDriverSupport" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Including the claw.urdf.xacro file to give scope to xacro:claw. Inclusion is a simple copy-and-paste of code. -->
-  <!-- <xacro:include filename="$(find end_effector_description)/urdf/end_effector.urdf.xacro" /> -->
+  <xacro:include filename="$(find end_effector_description)/urdf/end_effector.urdf.xacro" />
 
   <!-- UR5e robot arm -->
   <!-- URDF won't build if following args aren't defined. -->
@@ -41,6 +41,7 @@
     <parent link="tool0"/>
     <child link="simple_ee_link"/>
     <origin xyz="0 -0.02 0.16" rpy="0 0 0"/>  <!-- 1cm offset from tool0 -->
+
   </joint>
 
   <link name="camera_link"> </link>

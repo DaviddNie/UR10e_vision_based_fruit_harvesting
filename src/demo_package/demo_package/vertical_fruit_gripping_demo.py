@@ -9,7 +9,7 @@ VER_ELBOW = "ELBOW"
 VER_ELBOW_WRIST1 = "ELBOW_WRIST1"
 
 # position [x, y, z, roll, pitch, yaw]
-bird_eye_position = [0.44, 0.174, 1.0, -1.56, -0.0, -1.571]
+bird_eye_position = [0.54, 0.174, 0.9, -1.56, -0.0, -1.571]
 # bird_eye_position = [0.64, 0.174, 1.04, -1.56, -0.0, -1.571]
 # bird_eye_position = [0.44, 0.16, 0.83, -1.68, 0.0, -1.61]
 initial_bird_eye_position = [0.471,0.149, 1.044, -1.978, 0.058, -1.549]

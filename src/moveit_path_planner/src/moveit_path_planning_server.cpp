@@ -195,6 +195,7 @@ public:
     if (!target_set) {
         response->success = false;
         return;
+
     }
 
     // Apply constraints if specified

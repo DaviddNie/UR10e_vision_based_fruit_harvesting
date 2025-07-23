@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<!-- Only displays the end-effector -->
+
+<robot name="end_effector_only" xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Including the claw.urdf.xacro file to give scope to xacro:claw. Inclusion is a simple copy-and-paste of code. -->
+  <xacro:include filename="$(find end_effector_description)/urdf/end_effector.urdf.xacro" />
+
+  <!-- This is the abstract link which the base of the claw attaches to. -->
+  <link name="end_effector_root_link"/>
+
+  <!-- Instantiate the claw by using its macro. -->
+  <xacro:end_effector prefix="end_effector" parent="end_effector_root_link" >
+  </xacro:end_effector>
+
+</robot>
