@@ -10,11 +10,13 @@ VER_ELBOW_WRIST1 = "ELBOW_WRIST1"
 
 # position [x, y, z, roll, pitch, yaw]
 bird_eye_position = [0.54, 0.174, 0.9, -1.56, -0.0, -1.571]
+birds_eye_joint_pos = [-1.64, 1.66, -3.17, -1.57, 0.0, 0.0]
 # bird_eye_position = [0.64, 0.174, 1.04, -1.56, -0.0, -1.571]
 # bird_eye_position = [0.44, 0.16, 0.83, -1.68, 0.0, -1.61]
 initial_bird_eye_position = [0.471,0.149, 1.044, -1.978, 0.058, -1.549]
 birds_eye_via_point = [0.822, 0.183, 0.856, 0.0, 3.14, 0.0]
 drop_position = [0.822, 0.583, 0.556, 0.0, 3.14, 0.0]
+drop_pos_joint = [-1.05, 1.12, -1.64, -1.57, 2.01, 0.44]
 max_attempts = 3
 SCAN_MODE = 'scan'
 GRIP_MODE = 'grip'
@@ -98,8 +100,9 @@ class DemoRoutine(Node):
             self.get_logger().error(f'Reset Gripper Service call failed: {e}')
             return None
 
-    def send_movement_request(self, positions, constraint = NO_CONSTRAINT):
+    def send_movement_request(self, positions, command = "cartesian", constraint = NO_CONSTRAINT):
         request = MovementRequest.Request()
+        request.command = command
         request.positions = positions
         request.constraints_identifier = constraint
 
@@ -118,9 +121,10 @@ class DemoRoutine(Node):
 
     def run_demo(self):
 
-        # self.send_movement_request(birds_eye_via_point)
-
         while True:
+
+            self.send_movement_request(birds_eye_joint_pos, "joint", NO_CONSTRAINT)
+
             birds_eye_position_copy = copy.deepcopy(bird_eye_position)
             detected_apples = self.run_detection_at_pos(birds_eye_position_copy, SCAN_MODE)
             print(f"detected_apples are {detected_apples}")
@@ -176,8 +180,8 @@ class DemoRoutine(Node):
                 time.sleep(0.5)
                 
                 # 3.4 Lift the apple
-                self.get_logger().info("Lifting apple")
-                self.send_movement_request(above_apple)
+                # self.get_logger().info("Lifting apple")
+                # self.send_movement_request(above_apple)
                 
                 # 3.3.1 Reset Gripper in case of a safety fault
                 self.get_logger().info("reset gripper")
@@ -185,10 +189,10 @@ class DemoRoutine(Node):
 
                 # 3.4 Move horizontally to above the drop position
                 self.get_logger().info("Moving to drop position")
-                self.send_movement_request(adjusted_above_drop_off_position)
+                # self.send_movement_request(adjusted_above_drop_off_position)
 
                 # 3.5 Move to drop position
-                self.send_movement_request(drop_position)
+                self.send_movement_request(drop_pos_joint, "joint")
                 
                 # 3.6 Release the apple
                 self.get_logger().info("Releasing apple")
@@ -271,7 +275,15 @@ if __name__ == '__main__':
     main()
 
 # 0.9 flat
-# ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.64, 0.174, 0.9, -1.56, -0.0, -1.571]}"
+# ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{command: 'cartesian', positions: [0.64, 0.174, 0.9, -1.56, -0.0, -1.571], constraints_identifier: '0'}"
 
 # ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{positions: [0.595, 0.183, 0.811, 1.492, 0.06, 1.507]}"
 
+# HOME
+# ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{command: 'joint', positions: [-1.3, 1.57, -1.83, -1.57, 0, 0], constraints_identifier: '0'}"
+
+# BIRDS EYE JOINT
+# ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{command: 'joint', positions: [-1.64, 1.66, -3.17, -1.57, 0, 0], constraints_identifier: '0'}"
+
+# DROP POINT JOINT
+# ros2 service call /moveit_path_plan custom_interface/srv/MovementRequest "{command: 'joint', positions: [-1.05, 1.12, -1.64, -1.57, 2.01, 0.44], constraints_identifier: '0'}"
