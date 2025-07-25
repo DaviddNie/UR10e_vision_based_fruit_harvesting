@@ -54,14 +54,16 @@ planner_configs:
     type: geometric::PRMstar
   RRTstar:
     type: geometric::RRTstar
-    range: 0.1
+    range: 0
     goal_bias: 0.05
+    longest_valid_segment_fraction: 0.01
+    termination_condition: CostConvergence[10,.1]
     delay_collision_checking: 1  # Faster planning
     optimization_objective: PathLengthOptimization
   RRTConnect:
     type: geometric::RRTConnect
-    range: 0.1                  # Max expansion distance (meters/radians)
-    goal_bias: 0.05             # Probability to sample goal directly (0.0-1.0)
+    range: 0                # Max expansion distance (meters/radians)
+    goal_bias: 1             # Probability to sample goal directly (0.0-1.0)
     delay_collision_checking: 1 # Faster planning (1=delay checking until final path)
 ur_manipulator:
   planner_configs:

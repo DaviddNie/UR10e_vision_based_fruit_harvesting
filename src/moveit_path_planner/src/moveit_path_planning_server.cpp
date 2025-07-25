@@ -27,13 +27,13 @@ public:
     // base_link -> tool0
     move_group_ = std::make_shared<moveit::planning_interface::MoveGroupInterface>(
       node_, 
-      "arm",
+      "ur_manipulator",
       std::shared_ptr<tf2_ros::Buffer>(),
       rclcpp::Duration::from_seconds(5.0)
     );
 
     // Configure planner parameters
-    node_->declare_parameter("planning_time", 5.0);
+    node_->declare_parameter("planning_time", 20);
 
     // IMPORTANT!!!!!!!!!!!!!!!!!
     // Refrain urself from loosing the tolerance, if the planning is slow, it's probably not the fault of the tolerance
@@ -50,7 +50,7 @@ public:
     move_group_->setGoalJointTolerance(node_->get_parameter("goal_joint_tolerance").as_double());
     move_group_->setGoalPositionTolerance(node_->get_parameter("goal_position_tolerance").as_double());
     move_group_->setGoalOrientationTolerance(node_->get_parameter("goal_orientation_tolerance").as_double());
-    move_group_->setPlannerId("RRTsharp");
+    move_group_->setPlannerId("RRTstar");
 
     service_ = node_->create_service<custom_interface::srv::MovementRequest>(
       "/moveit_path_plan",
