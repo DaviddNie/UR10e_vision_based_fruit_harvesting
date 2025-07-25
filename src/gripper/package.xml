@@ -15,7 +15,6 @@
   <depend>rclpy</depend>   <!-- Add rclpy as a runtime dependency -->
   <depend>custom_interface</depend> 
 
-
   <export>
     <build_type>ament_python</build_type>
   </export>
