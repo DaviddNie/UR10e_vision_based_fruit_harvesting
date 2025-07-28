@@ -33,7 +33,7 @@ public:
     );
 
     // Configure planner parameters
-    node_->declare_parameter("planning_time", 20);
+    node_->declare_parameter("planning_time", 20.0);
 
     // IMPORTANT!!!!!!!!!!!!!!!!!
     // Refrain urself from loosing the tolerance, if the planning is slow, it's probably not the fault of the tolerance
@@ -211,9 +211,9 @@ public:
     std::string frame_id = "world";
     moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
 
-    planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 0.04, 3.0, 0.70, -0.30, 0.5, frame_id, "backWall"));
-    planning_scene_interface.applyCollisionObject(generateCollisionObject(0.04, 1.2, 3.0, -0.55, 0.25, 0.5, frame_id, "sideWall"));
-    planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 2.4, 0.01, 0.85, 0.25, 0.09, frame_id, "table"));
+    planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 0.04, 3.0, 0.70, -0.60, 0.5, frame_id, "backWall"));
+    planning_scene_interface.applyCollisionObject(generateCollisionObject(0.04, 2.4, 3.0, -0.55, 0.25, 0.8, frame_id, "sideWall"));
+    planning_scene_interface.applyCollisionObject(generateCollisionObject(3, 3, 0.01, 0.85, 0.25, 0.09, frame_id, "table"));
     planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 2.4, 0.04, 0.85, 0.25, 1.5, frame_id, "ceiling"));
   }
 

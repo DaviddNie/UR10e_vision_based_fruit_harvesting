@@ -10,7 +10,9 @@ VER_ELBOW_WRIST1 = "ELBOW_WRIST1"
 
 # position [x, y, z, roll, pitch, yaw]
 bird_eye_position = [0.54, 0.174, 0.9, -1.56, -0.0, -1.571]
-birds_eye_joint_pos = [-1.64, 1.66, -3.17, -1.57, 0.0, 0.0]
+# birds_eye_joint_pos = [-1.64, 1.66, -3.17, -1.57, 0.0, 0.0]
+birds_eye_joint_pos = [-1.9, 1.2, -2.0, -1.57, 0.0, 0.0]
+
 # bird_eye_position = [0.64, 0.174, 1.04, -1.56, -0.0, -1.571]
 # bird_eye_position = [0.44, 0.16, 0.83, -1.68, 0.0, -1.61]
 initial_bird_eye_position = [0.471,0.149, 1.044, -1.978, 0.058, -1.549]
@@ -125,11 +127,13 @@ class DemoRoutine(Node):
 
             self.send_movement_request(birds_eye_joint_pos, "joint", NO_CONSTRAINT)
 
-            birds_eye_position_copy = copy.deepcopy(bird_eye_position)
-            detected_apples = self.run_detection_at_pos(birds_eye_position_copy, SCAN_MODE)
+            # birds_eye_position_copy = copy.deepcopy(bird_eye_position)
+            # detected_apples = self.run_detection_at_pos(birds_eye_position_copy, SCAN_MODE)
+            detected_apples = self.run_detection_at_curr_pos()
             print(f"detected_apples are {detected_apples}")
             
             if not detected_apples:
+                print(f"no apple detected, ending")
                 break
 
             # Tune the birds eye to focus on the first apple to guarentee gripping success
@@ -143,8 +147,10 @@ class DemoRoutine(Node):
 
             gripping_pos_array = self.run_detection_at_pos(adjusted_birds_eye_position, SCAN_MODE)
             filtered_pos_array = self.filter_apples_for_pickup(gripping_pos_array, extracted_apple_distance)
+            print(f"gripper pose detected_apples are {gripping_pos_array}")
 
             if not filtered_pos_array:
+                print(f"all apples are filtered out, ending")
                 break
 
             self.get_logger().info("gripper init")
@@ -156,19 +162,19 @@ class DemoRoutine(Node):
                 above_apple_distance = x - 0.5
                 y_compensation = y + 0.06
                 z_compensation = z - 0.03
-                print(f"above_apple_distance is {above_apple_distance}")
 
                 above_apple = [above_apple_distance, y_compensation, z_compensation, -1.56, -0.0, -1.571]
                 adjusted_above_drop_off_position[0] = above_apple_distance
+                # pre_pick_position = [x - 0.23, y_compensation, z_compensation, -1.56, -0.0, -1.571]
                 pick_position = [x - 0.18, y_compensation, z_compensation, -1.56, -0.0, -1.571]
 
 
                 self.get_logger().info(f"Processing apple at position: {x}, {y}, {z}")
                 
-                # 3.1 Move above the apple
-                self.get_logger().info("Moving above apple")
-                self.send_movement_request(above_apple)
-                
+                # # 3.1 Move above the apple
+                # self.get_logger().info("Moving to hover position")
+                # self.send_movement_request(above_apple)
+
                 # 3.2 Lower to picking height
                 self.get_logger().info("Lowering to pick height")
                 self.send_movement_request(pick_position)
@@ -177,22 +183,26 @@ class DemoRoutine(Node):
                 self.get_logger().info("Gripping apple")
                 self.send_gripper_request(0)  # Close gripper # 78mm is used as 0mm would trigger a safety fault
                 
-                time.sleep(0.5)
+                time.sleep(2)
                 
                 # 3.4 Lift the apple
-                # self.get_logger().info("Lifting apple")
+                # self.get_logger().info("back to hovering height")
                 # self.send_movement_request(above_apple)
                 
                 # 3.3.1 Reset Gripper in case of a safety fault
                 self.get_logger().info("reset gripper")
                 self.send_reset_gripper_request(True)
 
+                self.send_gripper_request(100)
+
+
                 # 3.4 Move horizontally to above the drop position
                 self.get_logger().info("Moving to drop position")
                 # self.send_movement_request(adjusted_above_drop_off_position)
 
                 # 3.5 Move to drop position
-                self.send_movement_request(drop_pos_joint, "joint")
+                # self.send_movement_request(drop_pos_joint, "joint")
+                self.send_movement_request(drop_position)
                 
                 # 3.6 Release the apple
                 self.get_logger().info("Releasing apple")
@@ -200,7 +210,7 @@ class DemoRoutine(Node):
                                 
             # After processing all apples, loop will repeat detection
         
-        self.send_movement_request(bird_eye_position)
+        self.send_movement_request(birds_eye_joint_pos, "joint", NO_CONSTRAINT)
 
         self.get_logger().info("Demo routine completed")
 
@@ -231,18 +241,43 @@ class DemoRoutine(Node):
                 # Take photo and detect apples (identifier 47)
                 camera_response = self.send_camera_request("detect", 0)
                 
-                # If successful detection, return coordinates immediately
-                if camera_response and camera_response.success and camera_response.coordinates:
-                    self.get_logger().info(f"Successfully detected {len(camera_response.coordinates)} apples")
-                    return camera_response.coordinates
+                max_detect_attempt = 100
+                for attempt in range(1, max_detect_attempt + 1):
+                    # If successful detection, return coordinates immediately
+                    if camera_response and camera_response.success and camera_response.coordinates:
+                        self.get_logger().info(f"Successfully detected {len(camera_response.coordinates)} apples")
+                        return camera_response.coordinates
+                    else:
+                        self.get_logger().info(f"YOLO detection attempt {attempt} failed")
                     
                 self.get_logger().info(f"Detection failed on attempt {attempt}")
                 time.sleep(0.5)  # Brief pause between attempts
 
             self.get_logger().info("Max detection attempts reached with no apples found")
             return None
+    
 
-    def filter_apples_for_pickup(self, pos_array, target_distance, distance_tolerance=0.01):
+    def run_detection_at_curr_pos(self):
+            # 2. Take photo and detect apples (identifier 47)
+            self.get_logger().info("Detecting apples")
+            
+            # Take photo and detect apples (identifier 47)
+            camera_response = self.send_camera_request("detect", 0)
+            
+            max_detect_attempt = 100
+            for attempt in range(1, max_detect_attempt + 1):
+                # If successful detection, return coordinates immediately
+                if camera_response and camera_response.success and camera_response.coordinates:
+                    self.get_logger().info(f"Successfully detected {len(camera_response.coordinates)} apples")
+                    return camera_response.coordinates
+                else:
+                    self.get_logger().info(f"YOLO detection attempt {attempt} failed")
+                time.sleep(0.5)
+                
+            self.get_logger().info("Max detection attempts reached with no apples found")
+            return None
+
+    def filter_apples_for_pickup(self, pos_array, target_distance, distance_tolerance=0.05):
         """
         Filters apples to only those within height tolerance of target height.
         
@@ -259,6 +294,8 @@ class DemoRoutine(Node):
         for apple in pos_array: 
             if abs(apple.x - target_distance) <= distance_tolerance:
                 filtered_apples.append(apple)
+            else:
+                print(f"filtered out, difference is {abs(apple.x - target_distance)}")
         
         return filtered_apples
 
