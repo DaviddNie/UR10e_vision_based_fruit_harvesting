@@ -26,7 +26,7 @@ class CameraClient(Node):
             return None
             
         # Split into command and parameters
-        parts = input_str.split(maxsplit=1)
+        parts = input_str.split(maxsplit=2)
         command = parts[0].lower()
         print(command)
         # Validate command
@@ -36,9 +36,11 @@ class CameraClient(Node):
             
         # Parse identifier (param1)
         identifier = None
+        conf = None
         if len(parts) > 1:
             try:
                 identifier = int(parts[1])
+                conf = float(parts[2])
             except ValueError:
                 self.get_logger().error(f"Invalid identifier: {parts[1]}. Must be an integer.")
                 return None
@@ -51,8 +53,9 @@ class CameraClient(Node):
             request = CameraSrv.Request()
             request.command = command
             request.identifier = identifier
+            request.conf = conf
             
-            self.get_logger().info(f"Sending request - Command: {command}, ID: {identifier}")
+            self.get_logger().info(f"Sending request - Command: {command}, ID: {identifier}, conf: {conf}")
             
             future = self.client.call_async(request)
             rclpy.spin_until_future_complete(self, future)
