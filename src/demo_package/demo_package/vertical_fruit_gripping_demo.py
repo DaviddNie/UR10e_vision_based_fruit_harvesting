@@ -48,11 +48,12 @@ class DemoRoutine(Node):
         
         self.get_logger().info('DEMO ready!')
 
-    def send_camera_request(self, command, identifier):
+    def send_camera_request(self, command, identifier, conf):
         request = CameraSrv.Request()
         request.command = command
         request.identifier = identifier
-        self.get_logger().info(f'Sending Camera request: {command} {identifier}')
+        request.conf = conf
+        self.get_logger().info(f'Sending Camera request: {command} {identifier} {conf}')
 
         future = self.camera_client.call_async(request)
         rclpy.spin_until_future_complete(self, future)
@@ -239,16 +240,20 @@ class DemoRoutine(Node):
                 time.sleep(1.5)
 
                 # Take photo and detect apples (identifier 47)
-                camera_response = self.send_camera_request("detect", 0)
                 
                 max_detect_attempt = 100
+                conf = 0.5
                 for attempt in range(1, max_detect_attempt + 1):
+                    camera_response = self.send_camera_request("detect", 0, conf)
                     # If successful detection, return coordinates immediately
                     if camera_response and camera_response.success and camera_response.coordinates:
                         self.get_logger().info(f"Successfully detected {len(camera_response.coordinates)} apples")
                         return camera_response.coordinates
                     else:
-                        self.get_logger().info(f"YOLO detection attempt {attempt} failed")
+                        self.get_logger().info(f"YOLO detection attempt {attempt} with conf: {conf} failed")
+                        time.sleep(0.5)  # Brief pause between attempts
+
+                        conf = conf - 0.05 if conf >= 0.2 else conf
                     
                 self.get_logger().info(f"Detection failed on attempt {attempt}")
                 time.sleep(0.5)  # Brief pause between attempts
@@ -262,16 +267,18 @@ class DemoRoutine(Node):
             self.get_logger().info("Detecting apples")
             
             # Take photo and detect apples (identifier 47)
-            camera_response = self.send_camera_request("detect", 0)
             
             max_detect_attempt = 100
+            conf = 0.5
             for attempt in range(1, max_detect_attempt + 1):
+                camera_response = self.send_camera_request("detect", 0, conf)
                 # If successful detection, return coordinates immediately
                 if camera_response and camera_response.success and camera_response.coordinates:
                     self.get_logger().info(f"Successfully detected {len(camera_response.coordinates)} apples")
                     return camera_response.coordinates
                 else:
-                    self.get_logger().info(f"YOLO detection attempt {attempt} failed")
+                    self.get_logger().info(f"YOLO detection attempt {attempt} with conf: {conf} failed")
+                    conf = conf - 0.05 if conf >= 0.2 else conf
                 time.sleep(0.5)
                 
             self.get_logger().info("Max detection attempts reached with no apples found")

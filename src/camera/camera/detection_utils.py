@@ -64,7 +64,7 @@ class DetectionHandler:
             self.last_detections = []
 
             for i, (box, cls_id, conf) in enumerate(zip(boxes, class_ids, confidences)):
-                if cls_id == request.identifier and conf > 0.5:
+                if cls_id == request.identifier and conf > request.conf:
                     x_center = int((box[0] + box[2]) / 2)
                     y_center = int((box[1] + box[3]) / 2)
                     avg_depth = self.get_average_depth(int(x_center), int(y_center))
