@@ -147,12 +147,17 @@ class DemoRoutine(Node):
             adjusted_above_drop_off_position = copy.deepcopy(drop_position)
 
             gripping_pos_array = self.run_detection_at_pos(adjusted_birds_eye_position, SCAN_MODE)
+
+            if not gripping_pos_array:
+                print(f"no apples detected, ending")
+                break
+
             filtered_pos_array = self.filter_apples_for_pickup(gripping_pos_array, extracted_apple_distance)
             print(f"gripper pose detected_apples are {gripping_pos_array}")
 
             if not filtered_pos_array:
-                print(f"all apples are filtered out, ending")
-                break
+                print(f"bad photo, redetecting")
+                continue
 
             self.get_logger().info("gripper init")
             self.send_gripper_request(100)  # Open gripper
@@ -241,7 +246,7 @@ class DemoRoutine(Node):
 
                 # Take photo and detect apples (identifier 47)
                 
-                max_detect_attempt = 100
+                max_detect_attempt = 20
                 conf = 0.5
                 for attempt in range(1, max_detect_attempt + 1):
                     camera_response = self.send_camera_request("detect", 0, conf)
@@ -268,7 +273,7 @@ class DemoRoutine(Node):
             
             # Take photo and detect apples (identifier 47)
             
-            max_detect_attempt = 100
+            max_detect_attempt = 20
             conf = 0.5
             for attempt in range(1, max_detect_attempt + 1):
                 camera_response = self.send_camera_request("detect", 0, conf)
@@ -284,7 +289,7 @@ class DemoRoutine(Node):
             self.get_logger().info("Max detection attempts reached with no apples found")
             return None
 
-    def filter_apples_for_pickup(self, pos_array, target_distance, distance_tolerance=0.05):
+    def filter_apples_for_pickup(self, pos_array, target_distance, distance_tolerance=0.06):
         """
         Filters apples to only those within height tolerance of target height.
         
@@ -297,6 +302,9 @@ class DemoRoutine(Node):
             List of filtered apples meeting height criteria
         """
         filtered_apples = []
+
+        if len(pos_array) == 1:
+            return pos_array
         
         for apple in pos_array: 
             if abs(apple.x - target_distance) <= distance_tolerance:

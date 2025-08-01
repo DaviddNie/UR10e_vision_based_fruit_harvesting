@@ -50,7 +50,9 @@ public:
     move_group_->setGoalJointTolerance(node_->get_parameter("goal_joint_tolerance").as_double());
     move_group_->setGoalPositionTolerance(node_->get_parameter("goal_position_tolerance").as_double());
     move_group_->setGoalOrientationTolerance(node_->get_parameter("goal_orientation_tolerance").as_double());
-    move_group_->setPlannerId("RRTstar");
+    // move_group_->setPlannerId("RRTConnect");
+    // move_group_->setPlannerId("BKPIECEkConfigDefault");
+    move_group_->setPlannerId("TRRTkConfigDefault");
 
     service_ = node_->create_service<custom_interface::srv::MovementRequest>(
       "/moveit_path_plan",
@@ -213,7 +215,7 @@ public:
 
     planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 0.04, 3.0, 0.70, -0.60, 0.5, frame_id, "backWall"));
     planning_scene_interface.applyCollisionObject(generateCollisionObject(0.04, 2.4, 3.0, -0.55, 0.25, 0.8, frame_id, "sideWall"));
-    planning_scene_interface.applyCollisionObject(generateCollisionObject(3, 3, 0.01, 0.85, 0.25, 0.09, frame_id, "table"));
+    planning_scene_interface.applyCollisionObject(generateCollisionObject(3, 3, 0.01, 0.85, 0.25, 0.05, frame_id, "table"));
     planning_scene_interface.applyCollisionObject(generateCollisionObject(2.4, 2.4, 0.04, 0.85, 0.25, 1.5, frame_id, "ceiling"));
   }
 
