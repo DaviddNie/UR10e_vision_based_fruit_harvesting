@@ -4,14 +4,6 @@
     A URDF file must exist for this robot as well, where the joints and the links that are referenced are defined
 -->
 <robot name="end_effector_withDriverSupport">
-
-    <!-- <xacro:arg name="name" default="ur10"/>
-    <xacro:arg name="ur_type" default="ur10"/> -->
-    <!-- <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro"/> -->
-    <xacro:include filename="$(find end_effector_description)/urdf/end_effector.urdf.xacro" />
-    <xacro:end_effector/>
-    <!-- <xacro:ur/> -->
-
     <!--GROUPS: Representation of a set of joints and links. This can be useful for specifying DOF to plan for, defining arms, end effectors, etc-->
     <!--LINKS: When a link is specified, the parent joint of that link (if it exists) is automatically included-->
     <!--JOINTS: When a joint is specified, the child link of that joint (which will always exist) is automatically included-->
