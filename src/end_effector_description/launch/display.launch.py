@@ -133,7 +133,7 @@ def generate_launch_description():
     launch_description = [
         get_ur_control_launch(),
         get_moveit_launch(),
-        get_rviz_launch(),
+        # get_rviz_launch(),
     ]
 
     # Only add camera launch if using real hardware
