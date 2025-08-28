@@ -63,7 +63,7 @@ def get_ur_control_launch():
         'ur_type': ur_type,
         'robot_ip': ip_address,
         'use_fake_hardware': use_fake_str,
-        'launch_rviz': 'false',  
+        'launch_rviz': 'true',  
         'description_file': end_effector_path,
         'kinematics_params_file': kinematics_path,
     }
@@ -79,33 +79,33 @@ def get_ur_control_launch():
         launch_arguments=ur_control_launch_args.items(),
     )
 
-def get_moveit_launch():
-    """Configure MoveIt launch with a delay to ensure UR control is initialized."""
-    moveit_launch_args = {
-        'ur_type': ur_type,
-        'launch_rviz': 'true',
-        'use_fake_hardware': use_fake_str,
-    }
-
-    return TimerAction(
-        period=4.0,  # Delay to prevent conflicts in RViz
-        actions=[
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(
-                    PathJoinSubstitution([FindPackageShare('ur10e_moveit_config_official'), 'launch', 'ur_moveit.launch.py'])
-                ),
-                launch_arguments=moveit_launch_args.items(),
-            )
-        ]
-    )
 # def get_moveit_launch():
-#     moveit_launch_path = os.path.join(
-#         get_package_share_directory('ur10e_moveit_config'), 'launch', 'move_group.launch.py'
-#     )
+#     """Configure MoveIt launch with a delay to ensure UR control is initialized."""
+#     moveit_launch_args = {
+#         'ur_type': ur_type,
+#         'launch_rviz': 'true',
+#         'use_fake_hardware': use_fake_str,
+#     }
 
-#     return IncludeLaunchDescription(
-#         PythonLaunchDescriptionSource(moveit_launch_path)
+#     return TimerAction(
+#         period=4.0,  # Delay to prevent conflicts in RViz
+#         actions=[
+#             IncludeLaunchDescription(
+#                 PythonLaunchDescriptionSource(
+#                     PathJoinSubstitution([FindPackageShare('ur10e_moveit_config_official'), 'launch', 'ur_moveit.launch.py'])
+#                 ),
+#                 launch_arguments=moveit_launch_args.items(),
+#             )
+#         ]
 #     )
+def get_moveit_launch():
+    moveit_launch_path = os.path.join(
+        get_package_share_directory('ur10e_moveit_config'), 'launch', 'move_group.launch.py'
+    )
+
+    return IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(moveit_launch_path)
+    )
 
 def get_rviz_launch():
     moveit_launch_path = os.path.join(
@@ -137,7 +137,7 @@ def generate_launch_description():
 
     # Only add camera launch if using real hardware
     if not use_fake:
-        launch_description.append(get_realsense_launch())
+        # launch_description.append(get_realsense_launch())
         launch_description.append(get_auxiliary_launch())
 
     return LaunchDescription(launch_description)

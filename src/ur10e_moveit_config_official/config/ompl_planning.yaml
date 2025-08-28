@@ -72,19 +72,19 @@ planner_configs:
     delay_collision_checking: 1 # Faster planning (1=delay checking until final path)
 ur_manipulator:
   planner_configs:
-    # - RRTstar
-    # - RRTConnect
-    # - SBLkConfigDefault
-    # - ESTkConfigDefault
-    # - LBKPIECEkConfigDefault
-    # - BKPIECEkConfigDefault
-    # - KPIECEkConfigDefault
-    # - RRTkConfigDefault
-    # - RRTConnectkConfigDefault
-    # - RRTstarkConfigDefault
+    - RRTstar
+    - RRTConnect
+    - SBLkConfigDefault
+    - ESTkConfigDefault
+    - LBKPIECEkConfigDefault
+    - BKPIECEkConfigDefault
+    - KPIECEkConfigDefault
+    - RRTkConfigDefault
+    - RRTConnectkConfigDefault
+    - RRTstarkConfigDefault
     - TRRTkConfigDefault
-    # - PRMkConfigDefault
-    # - PRMstarkConfigDefault
+    - PRMkConfigDefault
+    - PRMstarkConfigDefault
   ##Note: commenting the following line lets moveit chose RRTConnect as default planner rather than LBKPIECE
   #projection_evaluator: joints(shoulder_pan_joint,shoulder_lift_joint)
   longest_valid_segment_fraction: 0.01

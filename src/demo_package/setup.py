@@ -23,6 +23,7 @@ setup(
 			'horizontal_fruit_gripping_demo = demo_package.horizontal_fruit_gripping_demo:main',
 			'vertical_fruit_gripping_demo = demo_package.vertical_fruit_gripping_demo:main',
 			'vertical_fruit_gripping_demo_tmp = demo_package.vertical_fruit_gripping_demo_tmp:main',
+			'planner_testing_demo = demo_package.planner_testing_demo:main',
         ],
     },
 )

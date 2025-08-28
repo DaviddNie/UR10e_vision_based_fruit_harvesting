@@ -42,7 +42,7 @@ def camera_node_launch():
 
 def generate_launch_description():
     return LaunchDescription([
-        gripper_server_launch(),
+        # gripper_server_launch(),
         moveit_planner_launch(),
-        camera_node_launch(),
+        # camera_node_launch(),
     ])
