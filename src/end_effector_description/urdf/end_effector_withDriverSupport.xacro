@@ -7,8 +7,8 @@
 
   <!-- UR5e robot arm -->
   <!-- URDF won't build if following args aren't defined. -->
-  <xacro:arg name="name" default="ur10"/>
-  <xacro:arg name="ur_type" default="ur10"/>
+  <xacro:arg name="name" default="ur5"/>
+  <xacro:arg name="ur_type" default="ur5"/>
   <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro"/>
 
  <!-- Simple rectangular end-effector -->

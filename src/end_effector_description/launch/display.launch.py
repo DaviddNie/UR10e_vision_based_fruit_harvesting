@@ -12,7 +12,7 @@ from launch.substitutions import LaunchConfiguration
 # Toggle between simulated or real UR5e hardware
 use_fake = False
 use_fake_str = 'true'
-ur_type = 'ur10e'
+ur_type = 'ur5e'
 ip_address = 'yyy.yyy.yyy.yyy'
 
 if not use_fake:
