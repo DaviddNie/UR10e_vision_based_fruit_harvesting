@@ -18,6 +18,7 @@ ip_address = 'yyy.yyy.yyy.yyy'
 if not use_fake:
     print("not fake")
     ip_address = '192.168.0.100'
+    # ip_address = '192.168.56.100'
     use_fake_str = 'false'
 
 
