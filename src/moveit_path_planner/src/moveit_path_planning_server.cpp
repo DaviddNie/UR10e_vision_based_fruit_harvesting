@@ -27,7 +27,7 @@ public:
     // base_link -> tool0
     move_group_ = std::make_shared<moveit::planning_interface::MoveGroupInterface>(
       node_, 
-      "ur_manipulator",
+      "arm",
       std::shared_ptr<tf2_ros::Buffer>(),
       rclcpp::Duration::from_seconds(5.0)
     );
